@@ -49,7 +49,7 @@ const getVerdict = (status) => {
   return VERDICT_MAP[status] || status;
 };
 
-export default function CodeEditor({ problemId }) {
+export default function CodeEditor({ problemId, contestId, onSubmit }) {
   const { token } = useContext(AuthContext);
   const [code, setCode] = useState(DEFAULT_CODE.javascript);
   const [language, setLanguage] = useState('javascript');
@@ -168,11 +168,16 @@ export default function CodeEditor({ problemId }) {
     // Store submission in database
     if (problemId && token) {
       try {
-        await api.createSubmission(token, {
+        const submissionData = {
           problem_id: problemId,
           verdict: getVerdict(verdictStatus)
-        });
+        };
+        if (contestId) {
+          submissionData.contest_id = contestId;
+        }
+        await api.createSubmission(token, submissionData);
         setFinalMessage(`Verdict: ${getVerdict(verdictStatus)}`);
+        if (onSubmit) onSubmit();
       } catch (error) {
         console.error('Failed to save submission:', error);
         setFinalMessage(`⚠ Results: ${getVerdict(verdictStatus)} (submission not saved)`);
