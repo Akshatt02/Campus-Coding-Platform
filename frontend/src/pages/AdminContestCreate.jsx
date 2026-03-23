@@ -49,7 +49,7 @@ export default function AdminContestCreate() {
         end_time: endTime,
       });
       setMessage({
-        text: `✅ Contest created successfully (ID: ${res.contestId})`,
+        text: `Contest created successfully (ID: ${res.contestId})`,
         type: 'success',
       });
       setContestId(res.contestId);
@@ -113,10 +113,13 @@ export default function AdminContestCreate() {
             You can now add problems by editing the contest.
           </p>
           <button
-            className="btn btn-primary w-full" // Use primary button for next step
+            className="btn btn-primary w-full flex items-center justify-center gap-2"
             onClick={() => navigate(`/admin/contest/${contestId}/edit`)}
           >
-            Edit Contest & Add Problems →
+            Edit Contest & Add Problems
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l7-7m-7 7H3" />
+            </svg>
           </button>
         </div>
       )}

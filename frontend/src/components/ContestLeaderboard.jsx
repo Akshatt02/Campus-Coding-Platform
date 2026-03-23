@@ -24,51 +24,61 @@ export default function ContestLeaderboard({ contest, token }) {
   }, [contest.id, token]);
 
   return (
-    <div className="card p-6">
-      <h3 className="text-xl font-semibold mb-3">Leaderboard</h3>
+    <div className="card p-8 anim-fade-in">
+      <h3 className="text-xl font-bold mb-6">Leaderboard</h3>
 
-      {loading && <div className="muted text-center p-4">Loading...</div>}
+      {loading && (
+          <div className="p-12 text-center">
+            <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div className="muted">Loading leaderboard...</div>
+          </div>
+      )}
 
       {error && (
-        <div className="p-3 rounded-md bg-red-100 text-red-700 text-sm">
+        <div className="p-4 rounded-xl bg-[rgba(239,68,68,0.1)] text-[var(--red)] border border-[rgba(239,68,68,0.2)] text-sm mb-6 text-center">
           {error}
         </div>
       )}
 
       {!loading && !error && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="py-2 px-2 font-semibold">Rank</th>
-                <th className="py-2 px-2 font-semibold">User</th>
-                <th className="py-2 px-2 font-semibold">Solved</th>
-                <th className="py-2 px-2 font-semibold">Penalty</th>
-                <th className="py-2 px-2 font-semibold">Time Sum (min)</th>
-                <th className="py-2 px-2 font-semibold">Wrong Before</th>
+              <tr>
+                <th className="!text-center">Rank</th>
+                <th>User</th>
+                <th className="!text-center">Solved</th>
+                <th className="!text-center">Penalty</th>
+                <th className="!text-center">Time (min)</th>
+                <th className="!text-center">Wrongs</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr
-                  key={r.user_id}
-                  className="border-b border-gray-100 hover:bg-sky-50"
-                >
-                  <td className="py-3 px-2 font-bold">{r.rank}</td>
-                  <td className="py-3 px-2 font-medium">{r.user_name}</td>
-                  <td className="py-3 px-2 text-green-600 font-bold">
+                <tr key={r.user_id} className={r.rank <= 3 ? 'bg-[var(--surface-2)]/50' : ''}>
+                  <td className="text-center">
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg font-extrabold font-display ${
+                        r.rank === 1 ? 'bg-[var(--amber)] text-[#080c14] shadow-[0_0_12px_var(--amber)]' : 
+                        r.rank === 2 ? 'bg-slate-400 text-[#080c14]' :
+                        r.rank === 3 ? 'bg-orange-700 text-[#f0f4ff]' : 'text-[var(--text-muted)]'
+                    }`}>
+                        {r.rank}
+                    </span>
+                  </td>
+                  <td className="font-bold text-[var(--text-primary)]">{r.user_name}</td>
+                  <td className="text-center font-bold text-[var(--emerald)] font-mono">
                     {r.solved_count}
                   </td>
-                  <td className="py-3 px-2">{r.penalty}</td>
-                  <td className="py-3 px-2">{r.time_sum_minutes}</td>
-                  <td className="py-3 px-2">{r.wrong_before_total}</td>
+                  <td className="text-center font-mono">{r.penalty}</td>
+                  <td className="text-center font-mono">{r.time_sum_minutes}</td>
+                  <td className="text-center text-[var(--red)] font-semibold font-mono">{r.wrong_before_total}</td>
                 </tr>
               ))}
               {rows.length === 0 && (
                 <tr>
                   <td
                     colSpan="6"
-                    className="text-center muted py-6"
+                    className="text-center muted py-12 bg-[var(--surface-2)]/30 border-dashed"
                   >
                     No leaderboard data yet.
                   </td>
@@ -78,6 +88,7 @@ export default function ContestLeaderboard({ contest, token }) {
           </table>
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

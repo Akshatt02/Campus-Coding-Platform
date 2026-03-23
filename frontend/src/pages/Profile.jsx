@@ -3,39 +3,22 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../context/AuthContext';
 
-function StatCard({ icon, label, value, sub, color = 'var(--cyan)', accent }) {
+function StatCard({ icon, label, value, sub, color = 'var(--cyan)' }) {
   return (
-    <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 14, padding: '22px 20px',
-      position: 'relative', overflow: 'hidden',
-      transition: 'border-color 0.25s, box-shadow 0.25s',
-    }}
-    onMouseEnter={e => {
-      e.currentTarget.style.borderColor = color;
-      e.currentTarget.style.boxShadow = `0 0 20px ${color}22`;
-    }}
-    onMouseLeave={e => {
-      e.currentTarget.style.borderColor = 'var(--border)';
-      e.currentTarget.style.boxShadow = 'none';
-    }}
-    >
+    <div className="card p-6 flex-1 relative overflow-hidden group">
       <div style={{
         position: 'absolute', top: 0, right: 0, width: 80, height: 80,
         background: `radial-gradient(circle at top right, ${color}12, transparent 70%)`,
         pointerEvents: 'none',
       }} />
-      <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
-      <div style={{
-        fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 30,
-        color, lineHeight: 1, marginBottom: 4,
-      }}>
+      <div className="text-2xl mb-4 opacity-80 group-hover:scale-110 transition-transform">{icon}</div>
+      <div className="stat-num text-3xl mb-1" style={{ color }}>
         {value}
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <div className="muted uppercase tracking-widest text-[10px] font-bold">
         {label}
       </div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{sub}</div>}
+      {sub && <div className="text-[11px] muted mt-2 italic">{sub}</div>}
     </div>
   );
 }
@@ -43,29 +26,30 @@ function StatCard({ icon, label, value, sub, color = 'var(--cyan)', accent }) {
 function DifficultyBar({ label, attempted, solved, color }) {
   const pct = attempted > 0 ? Math.round((solved / attempted) * 100) : 0;
   return (
-    <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div className="py-4 border-b border-[var(--border)] last:border-0">
+      <div className="flex justify-between items-center mb-2.5">
+        <div className="flex items-center gap-2.5">
           <span style={{
             display: 'inline-block', width: 8, height: 8,
             borderRadius: '50%', background: color,
-            boxShadow: `0 0 6px ${color}`,
+            boxShadow: `0 0 10px ${color}88`,
           }} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>{label}</span>
+          <span className="font-bold text-[var(--text-primary)] text-sm">{label}</span>
         </div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{attempted} attempted</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 14, color }}>{solved} solved</span>
+        <div className="flex gap-4 items-center">
+          <span className="text-[11px] muted font-mono">{attempted} tried</span>
+          <span className="font-mono font-bold text-sm" style={{ color }}>{solved} solved</span>
         </div>
       </div>
-      <div style={{ height: 4, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
-        <div style={{
-          height: '100%', width: `${pct}%`,
-          background: color,
-          borderRadius: 2,
-          boxShadow: `0 0 8px ${color}66`,
-          transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-        }} />
+      <div className="h-1.5 bg-[var(--surface-3)] rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-1000 ease-out"
+          style={{
+            width: `${pct}%`,
+            background: color,
+            boxShadow: `0 0 12px ${color}44`,
+          }}
+        />
       </div>
     </div>
   );
@@ -74,23 +58,22 @@ function DifficultyBar({ label, attempted, solved, color }) {
 function TagRow({ name, attempted, solved }) {
   const pct = attempted > 0 ? Math.round((solved / attempted) * 100) : 0;
   return (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      padding: '10px 0', borderBottom: '1px solid var(--border)',
-    }}>
-      <div style={{ flex: 1 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{name}</span>
-          <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
-            <span style={{ color: 'var(--cyan)' }}>{solved}</span>/{attempted}
+    <div className="flex items-center gap-4 py-3 border-b border-[var(--border)] last:border-0 group">
+      <div className="flex-1">
+        <div className="flex justify-between mb-1.5">
+          <span className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[var(--cyan)] transition-colors">{name}</span>
+          <span className="text-[10px] font-mono muted">
+            <span className="text-[var(--cyan)] font-bold">{solved}</span>/{attempted}
           </span>
         </div>
-        <div style={{ height: 3, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
-          <div style={{
-            height: '100%', width: `${pct}%`,
-            background: pct > 70 ? 'var(--emerald)' : pct > 40 ? 'var(--cyan)' : '#f59e0b',
-            borderRadius: 2, transition: 'width 0.6s',
-          }} />
+        <div className="h-1 bg-[var(--surface-3)] rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-700"
+            style={{
+              width: `${pct}%`,
+              background: pct > 70 ? 'var(--emerald)' : pct > 40 ? 'var(--cyan)' : 'var(--amber)',
+            }}
+          />
         </div>
       </div>
     </div>
@@ -138,8 +121,11 @@ export default function Profile() {
 
   if (error) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ padding: '20px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#f87171', fontSize: 14 }}>
-        ⚠ {error}
+      <div style={{ padding: '20px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#f87171', fontSize: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        {error}
       </div>
     </div>
   );
@@ -162,106 +148,88 @@ export default function Profile() {
   const weakFiltered = (weak_topics || []).filter(t => Number(t.wrong_percent) >= 40);
 
   return (
-    <div style={{ minHeight: '100vh', padding: '32px 0 60px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
-
+    <>
+      <div className="max-w-6xl mx-auto space-y-8 anim-fade-in" style={{ padding: '24px 0' }}>
         {/* ── PROFILE HEADER ── */}
-        <div className="anim-fade-up" style={{
-          background: 'var(--surface)',
-          border: '1px solid var(--border)',
-          borderRadius: 20, padding: '28px 32px',
-          marginBottom: 24,
-          position: 'relative', overflow: 'hidden',
-        }}>
+        <div className="card p-10 relative overflow-hidden">
           {/* Background glow */}
           <div style={{
-            position: 'absolute', top: -40, right: -40,
-            width: 200, height: 200,
-            background: `radial-gradient(circle, ${ratingColor}10 0%, transparent 70%)`,
+            position: 'absolute', top: -100, right: -100,
+            width: 300, height: 300,
+            background: `radial-gradient(circle, ${ratingColor}15 0%, transparent 70%)`,
             pointerEvents: 'none',
           }} />
 
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+          <div className="flex items-start gap-10 flex-wrap lg:flex-nowrap relative z-1">
             {/* Avatar */}
-            <div style={{
-              width: 72, height: 72, borderRadius: 18,
-              background: `linear-gradient(135deg, ${ratingColor}, ${ratingColor}88)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 28, fontWeight: 800, color: '#080c14',
-              fontFamily: 'var(--font-display)',
-              boxShadow: `0 0 24px ${ratingColor}44`,
-              flexShrink: 0,
-            }}>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-extrabold text-[#080c14] shadow-2xl flex-shrink-0"
+                 style={{
+                   background: `linear-gradient(135deg, ${ratingColor}, ${ratingColor}88)`,
+                   boxShadow: `0 12px 40px ${ratingColor}33`,
+                 }}>
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
 
             {/* Info */}
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
-                <h1 style={{
-                  fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 24,
-                  letterSpacing: '-0.02em', margin: 0,
-                }}>
-                  {user.name}
-                </h1>
+            <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <h1 className="text-4xl font-extrabold tracking-tight">{user.name}</h1>
                 {ratingLabel && (
-                  <span style={{
-                    padding: '3px 10px',
-                    background: `${ratingColor}15`,
-                    border: `1px solid ${ratingColor}40`,
-                    borderRadius: 6,
-                    fontSize: 11, fontWeight: 700,
-                    fontFamily: 'var(--font-display)', letterSpacing: '0.06em',
-                    textTransform: 'uppercase', color: ratingColor,
-                  }}>{ratingLabel}</span>
+                  <span className="badge font-bold px-3 py-1 uppercase tracking-widest text-[10px]"
+                        style={{ background: `${ratingColor}15`, border: `1px solid ${ratingColor}40`, color: ratingColor }}>
+                    {ratingLabel}
+                  </span>
                 )}
-                {isOwnProfile && (
-                  <span style={{
-                    padding: '3px 10px',
-                    background: 'var(--cyan-dim)',
-                    border: '1px solid rgba(0,212,255,0.25)',
-                    borderRadius: 6,
-                    fontSize: 11, fontWeight: 700,
-                    fontFamily: 'var(--font-display)', letterSpacing: '0.06em',
-                    textTransform: 'uppercase', color: 'var(--cyan)',
-                  }}>You</span>
-                )}
+                {isOwnProfile && <span className="badge badge-cyan font-bold px-3 py-1 uppercase tracking-widest text-[10px]">Your Profile</span>}
               </div>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-                  {user.department || 'No Department'} · Batch {user.batch || '—'}
-                </span>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                  {user.email}
-                </span>
+              <div className="flex gap-6 items-center flex-wrap">
+                <div className="flex items-center gap-2 text-[var(--text-secondary)] font-medium">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    {user.department || 'No Department'} · Batch {user.batch || '—'}
+                </div>
+                <div className="flex items-center gap-2 muted font-mono text-sm leading-none">
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                     {user.email}
+                </div>
               </div>
             </div>
 
             {/* Rating big display */}
-            <div style={{ textAlign: 'right' }}>
-              <div style={{
-                fontFamily: 'var(--font-display)', fontWeight: 900,
-                fontSize: 48, lineHeight: 1, color: ratingColor,
-                textShadow: `0 0 30px ${ratingColor}66`,
-              }}>
+            <div className="text-right lg:pl-10 lg:border-l border-[var(--border)]">
+              <div className="stat-num text-7xl leading-none" style={{ color: ratingColor, textShadow: `0 0 40px ${ratingColor}55` }}>
                 {user.rating ?? '—'}
               </div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
-                Rating
-              </div>
+              <div className="muted font-bold uppercase tracking-[0.2em] text-[10px] mt-3">Platform Rating</div>
             </div>
           </div>
         </div>
 
         {/* ── STATS GRID ── */}
-        <div className="anim-fade-up delay-1" style={{
-          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 12, marginBottom: 24,
-        }}>
-          <StatCard icon="📤" label="Submissions" value={stats.total} color="var(--text-secondary)" />
-          <StatCard icon="✅" label="Accepted" value={stats.ac} color="var(--emerald)" />
-          <StatCard icon="🎯" label="Accuracy" value={`${stats.ac_percent}%`} color={stats.ac_percent > 60 ? 'var(--emerald)' : '#f59e0b'} />
-          <StatCard icon="🏆" label="Contests" value={contests_count} color="var(--cyan)" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <StatCard
+            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>}
+            label="Total Submissions"
+            value={stats.total}
+            color="var(--text-secondary)"
+          />
+          <StatCard
+            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>}
+            label="Accepted (AC)"
+            value={stats.ac}
+            color="var(--emerald)"
+          />
+          <StatCard
+            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+            label="Success Rate"
+            value={`${stats.ac_percent}%`}
+            color={stats.ac_percent > 60 ? 'var(--emerald)' : 'var(--amber)'}
+          />
+          <StatCard
+            icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.143-7.714L2 12l6.857-2.143L11 3z" /></svg>}
+            label="Competitions"
+            value={contests_count}
+            color="var(--cyan)"
+          />
         </div>
 
         {/* ── MAIN GRID ── */}
@@ -287,9 +255,13 @@ export default function Profile() {
             </p>
             {weakFiltered.length === 0 ? (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🎉</div>
-                <div style={{ color: 'var(--emerald)', fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: 14 }}>No weak topics found</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 4 }}>Keep up the great work!</div>
+                <div style={{ color: 'var(--emerald)', marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div style={{ color: 'var(--emerald)', fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: 14 }}>No weak topics identified</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 4 }}>Excellent performance across all areas.</div>
               </div>
             ) : (
               <div>
@@ -336,8 +308,12 @@ export default function Profile() {
             </h3>
             {contest_history.length === 0 ? (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🏅</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>No contests participated yet</div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
+                    <svg className="w-8 h-8 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>No contest participation recorded yet</div>
               </div>
             ) : (
               <div style={{ maxHeight: 280, overflowY: 'auto', paddingRight: 4 }}>
@@ -382,6 +358,6 @@ export default function Profile() {
         </div>
       </div>
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+    </>
   );
 }

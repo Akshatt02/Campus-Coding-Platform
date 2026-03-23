@@ -23,7 +23,8 @@ export const getBlogById = async (req, res) => {
     const [blogs] = await pool.execute(`
       SELECT b.*, u.name as author_name,
              (SELECT COUNT(*) FROM blog_votes WHERE blog_id = b.id AND vote = 1) as likes,
-             (SELECT COUNT(*) FROM blog_votes WHERE blog_id = b.id AND vote = -1) as dislikes
+             (SELECT COUNT(*) FROM blog_votes WHERE blog_id = b.id AND vote = -1) as dislikes,
+             (SELECT COUNT(*) FROM comments WHERE blog_id = b.id) as total_comments
       FROM blogs b
       JOIN users u ON b.author_id = u.id
       WHERE b.id = ?
@@ -32,7 +33,8 @@ export const getBlogById = async (req, res) => {
     if (blogs.length === 0) return res.status(404).json({ message: 'Blog not found' });
 
     const [comments] = await pool.execute(`
-      SELECT c.*, u.name as user_name
+      SELECT c.*, u.name as user_name,
+             (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id) as likes
       FROM comments c
       JOIN users u ON c.user_id = u.id
       WHERE c.blog_id = ?

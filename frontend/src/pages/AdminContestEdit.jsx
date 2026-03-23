@@ -9,18 +9,22 @@ import api from '../api';
  */
 const ConfirmationModal = ({ message, onConfirm, onCancel }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="card p-6 max-w-sm w-full">
-        <h3 className="text-lg font-semibold mb-4">{message}</h3>
-        <div className="flex justify-end gap-3">
-          <button onClick={onCancel} className="btn btn-ghost">
-            Cancel
-          </button>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgba(0,0,0,0.8)] backdrop-blur-sm anim-fade-in">
+      <div className="card p-8 max-w-sm w-full border border-[var(--border-accent)] shadow-2xl scale-in">
+        <div className="w-12 h-12 rounded-full bg-[rgba(239,68,68,0.1)] flex items-center justify-center mb-6 mx-auto">
+            <svg className="w-6 h-6 text-[var(--red)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        </div>
+        <h3 className="text-xl font-bold mb-2 text-center">Confirm Action</h3>
+        <p className="muted text-center mb-8 text-sm">{message}</p>
+        <div className="flex flex-col gap-3">
           <button
             onClick={onConfirm}
-            className="btn bg-red-600 text-white hover:bg-red-700"
+            className="btn btn-danger w-full !py-3"
           >
-            Confirm
+            Confirm & Proceed
+          </button>
+          <button onClick={onCancel} className="btn btn-ghost w-full">
+            Cancel
           </button>
         </div>
       </div>
@@ -201,10 +205,10 @@ export default function AdminContestEdit() {
     const isSuccess = message.type === 'success';
     return (
       <div
-        className={`mb-4 p-3 rounded-md ${
+        className={`mb-4 p-3 rounded-md border ${
           isSuccess
-            ? 'bg-green-100 text-green-700'
-            : 'bg-red-100 text-red-700'
+            ? 'bg-[rgba(16,185,129,0.1)] text-[var(--emerald)] border-[rgba(16,185,129,0.2)]'
+            : 'bg-[rgba(239,68,68,0.1)] text-[var(--red)] border-[rgba(239,68,68,0.2)]'
         } text-sm`}
       >
         {message.text}
@@ -213,7 +217,7 @@ export default function AdminContestEdit() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 anim-fade-in" style={{ padding: '24px 0' }}>
       {/* Render Modal */}
       {modal.isOpen && (
         <ConfirmationModal
@@ -223,157 +227,190 @@ export default function AdminContestEdit() {
         />
       )}
 
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">Manage Contest</h1>
+        <p className="text-[var(--text-secondary)]">Administrative controls for contest settings and problem set.</p>
+      </div>
+
       {isPast ? (
         // "Contest Ended" View
-        <div className="card p-6">
-          <h2 className="text-xl font-semibold mb-3">Contest #{id} (Ended)</h2>
-          {renderMessage()}
-          <div className="muted mb-4">
-            This contest has ended. Editing is locked. You can still delete the
-            contest.
+        <div className="card p-8 border-dashed border-[var(--border)]">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="badge badge-amber uppercase tracking-widest text-[10px] font-bold">LOCKED</div>
+            <h2 className="text-2xl font-bold">Contest #{id} (Ended)</h2>
           </div>
+          {renderMessage()}
+          <p className="muted mb-8 italic">
+            This contest has concluded. Operational editing is now restricted. You may still remove the contest from the platform records if necessary.
+          </p>
           <button
             type="button"
-            className="btn bg-red-600 text-white hover:bg-red-700"
+            className="btn btn-danger"
             onClick={handleDeleteContest}
           >
-            Delete contest
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            Purge contest
           </button>
         </div>
       ) : (
         // "Editable" View
-        <>
-          {/* Edit Contest Details Card */}
-          <div className="card p-6">
-            <h2 className="text-xl font-semibold mb-3">
-              Edit Contest #{id} (Admin)
-            </h2>
-            {renderMessage()}
-            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
-              <input
-                placeholder="Contest Title"
-                className="form-input"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <div className="flex flex-col md:flex-row gap-4">
-                <input
-                  type="datetime-local"
-                  className="form-input flex-1"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-                <input
-                  type="datetime-local"
-                  className="form-input flex-1"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-3">
-                <button className="btn btn-primary" type="submit">
-                  Save changes
-                </button>
-                <button
-                  type="button"
-                  className="btn bg-red-600 text-white hover:bg-red-700"
-                  onClick={handleDeleteContest}
-                >
-                  Delete contest
-                </button>
-              </div>
-            </form>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Col: Settings */}
+            <div className="lg:col-span-1 space-y-6">
+                <div className="card p-6">
+                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[var(--cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Contest Details
+                    </h3>
+                    {renderMessage()}
+                    <form onSubmit={handleUpdate} className="flex flex-col gap-6">
+                        <div className="space-y-1.5">
+                            <label className="form-label">Title</label>
+                            <input
+                                placeholder="Summer Coding Challenge"
+                                className="form-input"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="form-label">Start Time</label>
+                            <input
+                                type="datetime-local"
+                                className="form-input"
+                                value={startTime}
+                                onChange={(e) => setStartTime(e.target.value)}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="form-label">End Time</label>
+                            <input
+                                type="datetime-local"
+                                className="form-input"
+                                value={endTime}
+                                onChange={(e) => setEndTime(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-3 pt-4 border-t border-[var(--border)]">
+                            <button className="btn btn-primary w-full" type="submit">
+                                Update Settings
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-danger btn-sm"
+                                onClick={handleDeleteContest}
+                            >
+                                Delete Contest
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-          {/* Problems in Contest Card */}
-          <div className="card p-6">
-            <h3 className="text-lg font-semibold mb-3">Problems in Contest</h3>
-            {problems.length === 0 ? (
-              <p className="muted">No problems yet</p>
-            ) : (
-              <div className="space-y-3">
-                {problems.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex justify-between items-center p-4 bg-sky-50 border border-sky-100 rounded-lg"
-                  >
-                    <div>
-                      <div className="font-semibold">{p.title}</div>
-                      <div className="text-sm muted capitalize">
-                        {p.difficulty} {p.tags ? `— ${p.tags}` : ''}
-                      </div>
+            {/* Right Col: Problems */}
+            <div className="lg:col-span-2 space-y-8">
+                {/* Current Problems */}
+                <div className="card p-6">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[var(--emerald)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        Contest Problems
+                    </h3>
+                    <div className="space-y-4">
+                        {problems.length === 0 ? (
+                            <div className="p-12 text-center muted italic bg-[var(--surface-2)]/30 border border-dashed border-[var(--border)] rounded-xl">
+                                This contest currently has no problems. Add some below.
+                            </div>
+                        ) : (
+                            problems.map((p) => (
+                                <div
+                                    key={p.id}
+                                    className="flex justify-between items-center p-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl group hover:border-[var(--border-accent)] transition-all"
+                                >
+                                    <div>
+                                        <div className="font-bold text-[var(--text-primary)] group-hover:text-[var(--cyan)] transition-colors">{p.title}</div>
+                                        <div className="flex gap-2 mt-1">
+                                            <span className={`badge ${p.difficulty === 'easy' ? 'badge-emerald' : p.difficulty === 'medium' ? 'badge-amber' : 'badge-red'} !text-[9px] !py-0`}>
+                                                {p.difficulty}
+                                            </span>
+                                            <span className="text-[10px] muted uppercase font-mono">{p.tags}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            className="btn btn-ghost btn-sm"
+                                            onClick={() => navigate(`/problems/${p.id}`)}
+                                        >
+                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        </button>
+                                        <button
+                                            className="btn btn-danger btn-sm"
+                                            onClick={() => handleRemoveProblem(p.id)}
+                                        >
+                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        className="btn btn-ghost"
-                        onClick={() => navigate(`/problems/${p.id}`)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="btn bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => handleRemoveProblem(p.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                </div>
 
-          {/* Create & Add Problem Card */}
-          <div className="card p-6">
-            <h3 className="text-lg font-semibold mb-3">
-              Create & Add Problem
-            </h3>
-            <form onSubmit={handleAddProblem} className="flex flex-col gap-4">
-              <input
-                className="form-input"
-                placeholder="Title"
-                value={problemForm.title}
-                onChange={(e) =>
-                  setProblemForm({ ...problemForm, title: e.target.value })
-                }
-                required
-              />
-              <textarea
-                className="form-input"
-                placeholder="Statement"
-                value={problemForm.statement}
-                onChange={(e) =>
-                  setProblemForm({ ...problemForm, statement: e.target.value })
-                }
-                required
-              />
-              <select
-                className="form-select"
-                value={problemForm.difficulty}
-                onChange={(e) =>
-                  setProblemForm({
-                    ...problemForm,
-                    difficulty: e.target.value,
-                  })
-                }
-              >
-                <option value="easy" className="form-option">Easy</option>
-                <option value="medium" className="form-option">Medium</option>
-                <option value="hard" className="form-option">Hard</option>
-              </select>
-              <input
-                className="form-input"
-                placeholder="Tags (comma separated, e.g., math,dp)"
-                value={problemForm.tags}
-                onChange={(e) =>
-                  setProblemForm({ ...problemForm, tags: e.target.value })
-                }
-                required
-              />
-              <button className="btn btn-primary">Create & Add</button>
-            </form>
-          </div>
-        </>
+                {/* Add New Problem */}
+                <div className="card p-6">
+                    <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-[var(--violet)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>
+                        Create & Insert Problem
+                    </h3>
+                    <form onSubmit={handleAddProblem} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="md:col-span-2 space-y-1.5">
+                            <label className="form-label">Problem Title</label>
+                            <input
+                                className="form-input"
+                                placeholder="Optimized Fibonacci Search"
+                                value={problemForm.title}
+                                onChange={(e) => setProblemForm({ ...problemForm, title: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="md:col-span-2 space-y-1.5">
+                            <label className="form-label">Problem Statement</label>
+                            <textarea
+                                className="form-input min-h-[120px]"
+                                placeholder="Describe the problem, constraints, and test cases..."
+                                value={problemForm.statement}
+                                onChange={(e) => setProblemForm({ ...problemForm, statement: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="form-label">Difficulty</label>
+                            <select
+                                className="form-select"
+                                value={problemForm.difficulty}
+                                onChange={(e) => setProblemForm({ ...problemForm, difficulty: e.target.value })}
+                            >
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="form-label">Tags</label>
+                            <input
+                                className="form-input"
+                                placeholder="math, dynamic-programming, greedy"
+                                value={problemForm.tags}
+                                onChange={(e) => setProblemForm({ ...problemForm, tags: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="md:col-span-2 pt-4">
+                            <button className="btn btn-primary w-full">Deploy Problem to Contest</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
       )}
     </div>
   );

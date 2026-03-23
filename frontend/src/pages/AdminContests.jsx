@@ -47,7 +47,7 @@ export default function AdminContests() {
   // Styled error state
   if (error) {
     return (
-      <div className="card p-6 bg-red-100 text-red-700 max-w-lg mx-auto text-center">
+      <div className="card p-6 bg-[rgba(239,68,68,0.1)] text-[var(--red)] border border-[rgba(239,68,68,0.2)] max-w-lg mx-auto text-center">
         {error}
       </div>
     );
@@ -72,8 +72,11 @@ export default function AdminContests() {
             >
               <div>
                 <h3 className="text-xl font-semibold">{c.title}</h3>
-                <p className="text-sm muted mt-1">
-                  {formatDateTime(c.start_time)} →{' '}
+                <p className="text-sm text-[var(--text-secondary)] mt-1 flex items-center gap-2">
+                  {formatDateTime(c.start_time)}
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                   {formatDateTime(c.end_time)}
                 </p>
               </div>

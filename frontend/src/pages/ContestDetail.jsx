@@ -93,10 +93,10 @@ export default function ContestDetail() {
     const isSuccess = message.type === 'success';
     return (
       <div
-        className={`mt-3 p-3 rounded-md ${
+        className={`mt-3 p-3 rounded-md border ${
           isSuccess
-            ? 'bg-green-100 text-green-700'
-            : 'bg-red-100 text-red-700'
+            ? 'bg-[rgba(16,185,129,0.1)] text-[var(--emerald)] border-[rgba(16,185,129,0.2)]'
+            : 'bg-[rgba(239,68,68,0.1)] text-[var(--red)] border-[rgba(239,68,68,0.2)]'
         } text-sm`}
       >
         {message.text}
@@ -142,8 +142,12 @@ export default function ContestDetail() {
             ? `${contest.department_name} Department`
             : 'College-wide'}
         </div>
-        <div className="mt-2 muted">
-          {formatDateTime(contest.start_time)} → {formatDateTime(contest.end_time)}
+        <div className="mt-2 text-[var(--text-secondary)] flex items-center gap-2">
+          {formatDateTime(contest.start_time)}
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+          {formatDateTime(contest.end_time)}
         </div>
 
         {/* Styled registration button/badge */}

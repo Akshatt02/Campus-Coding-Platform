@@ -3,13 +3,13 @@ import api from '../api';
 
 // Helper function (from Submissions.js)
 const getVerdictStyle = (verdict) => {
-  if (!verdict) return 'badge';
+  if (!verdict) return 'badge-default';
   const v = verdict.toLowerCase();
-  if (v.includes('ac')) return '!bg-green-100 !text-green-700';
-  if (v.includes('wa') || v.includes('error')) return '!bg-red-100 !text-red-700';
-  if (v.includes('tle')) return '!bg-yellow-100 !text-yellow-700';
-  if (v.includes('ce') || v.includes('running')) return '!bg-blue-100 !text-blue-700';
-  return 'badge';
+  if (v.includes('ac')) return 'badge-green';
+  if (v.includes('wa') || v.includes('re')) return 'badge-red';
+  if (v.includes('tle')) return 'badge-amber';
+  if (v.includes('ce')) return 'badge-blue';
+  return 'badge-default';
 };
 
 // Helper function (from Contests.js)
@@ -76,20 +76,31 @@ export default function ContestSubmissions({ contest, token }) {
   };
 
   return (
-    <div className="card p-6">
-      <h3 className="text-xl font-semibold mb-3">Submissions</h3>
-      <p className="text-sm muted mb-4">
-        Shows submissions made during the contest period.
-      </p>
+    <div className="card p-8 anim-fade-in">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <h3 className="text-xl font-bold mb-1">Submissions</h3>
+            <p className="text-sm muted">
+                Complete log of submissions during the contest.
+            </p>
+        </div>
+        <div className="flex gap-2">
+            <button className="btn btn-secondary btn-sm" onClick={load}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                Sync
+            </button>
+        </div>
+      </div>
 
       {/* Styled filter form */}
       <form
         onSubmit={apply}
-        className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4"
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-8 p-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl"
       >
-        <div className="md:col-span-1">
+        <div className="form-group flex-1">
+          <label className="form-label">User</label>
           <input
-            placeholder="Search by user name"
+            placeholder="Search name..."
             value={filters.user_name}
             onChange={(e) =>
               setFilters({ ...filters, user_name: e.target.value })
@@ -97,7 +108,8 @@ export default function ContestSubmissions({ contest, token }) {
             className="form-input"
           />
         </div>
-        <div>
+        <div className="form-group">
+          <label className="form-label">Verdict</label>
           <select
             value={filters.verdict}
             onChange={(e) =>
@@ -105,17 +117,18 @@ export default function ContestSubmissions({ contest, token }) {
             }
             className="form-select"
           >
-            <option value="" className="form-option">All verdicts</option>
-            <option value="AC" className="form-option">AC</option>
-            <option value="WA" className="form-option">WA</option>
-            <option value="TLE" className="form-option">TLE</option>
-            <option value="RE" className="form-option">RE</option>
-            <option value="CE" className="form-option">CE</option>
+            <option value="" className="form-option">All</option>
+            <option value="AC" className="form-option">Accepted</option>
+            <option value="WA" className="form-option">Wrong Answer</option>
+            <option value="TLE" className="form-option">Time Limit</option>
+            <option value="RE" className="form-option">Runtime Error</option>
+            <option value="CE" className="form-option">Compile Error</option>
           </select>
         </div>
-        <div className="md:col-span-1">
+        <div className="form-group flex-1">
+          <label className="form-label">Problem</label>
           <input
-            placeholder="Search by problem title"
+            placeholder="Search title..."
             value={filters.problem_title}
             onChange={(e) =>
               setFilters({ ...filters, problem_title: e.target.value })
@@ -123,57 +136,54 @@ export default function ContestSubmissions({ contest, token }) {
             className="form-input"
           />
         </div>
-        <div className="flex gap-3">
-          <button className="btn btn-primary w-full" type="submit">
+        <div className="flex gap-3 h-[45px]">
+          <button className="btn btn-primary flex-1" type="submit">
             Filter
           </button>
-          <button type="button" className="btn btn-ghost w-full" onClick={reset}>
-            Reset
+          <button type="button" className="btn btn-ghost" onClick={reset}>
+             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
       </form>
 
       {/* Styled states */}
       {error && (
-        <div className="p-3 rounded-md bg-red-100 text-red-700 text-sm">
+        <div className="p-4 rounded-xl bg-[rgba(239,68,68,0.1)] text-[var(--red)] border border-[rgba(239,68,68,0.2)] text-sm mb-6 text-center">
           {error}
         </div>
       )}
-      {loading && <div className="muted text-center p-4">Loading...</div>}
+      {loading && <div className="card p-12 text-center">
+            <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div className="muted">Loading submissions...</div>
+        </div>
+      }
 
-      {!loading && submissions.length === 0 && (
-        <div className="muted text-center p-8">No submissions found.</div>
+      {!loading && !error && submissions.length === 0 && (
+        <div className="muted text-center p-12 card bg-[var(--surface-2)] border-dashed">No submissions found.</div>
       )}
 
       {/* Styled table */}
-      {!loading && submissions.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+      {!loading && !error && submissions.length > 0 && (
+        <div className="overflow-x-auto rounded-xl border border-[var(--border)]">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="py-2 px-2 font-semibold">Time</th>
-                <th className="py-2 px-2 font-semibold">User</th>
-                <th className="py-2 px-2 font-semibold">Problem</th>
-                <th className="py-2 px-2 font-semibold">Verdict</th>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Problem</th>
+                <th>Verdict</th>
               </tr>
             </thead>
             <tbody>
-              {submissions.map((s, idx) => (
-                <tr
-                  key={s.id}
-                  className="border-b border-gray-100 hover:bg-sky-50"
-                >
-                  <td className="py-3 px-2 text-sm muted">
+              {submissions.map((s) => (
+                <tr key={s.id}>
+                  <td className="text-xs font-mono muted">
                     {formatDateTime(s.created_at)}
                   </td>
-                  <td className="py-3 px-2 font-medium">{s.user_name}</td>
-                  <td className="py-3 px-2">{s.problem_title}</td>
-                  <td className="py-3 px-2">
-                    <span
-                      className={`badge !font-bold ${getVerdictStyle(
-                        s.verdict
-                      )}`}
-                    >
+                  <td className="font-bold text-[var(--text-primary)]">{s.user_name}</td>
+                  <td className="font-medium">{s.problem_title}</td>
+                  <td>
+                    <span className={`badge ${getVerdictStyle(s.verdict)}`}>
                       {s.verdict}
                     </span>
                   </td>
@@ -183,6 +193,7 @@ export default function ContestSubmissions({ contest, token }) {
           </table>
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

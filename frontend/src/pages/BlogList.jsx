@@ -73,14 +73,18 @@ export default function BlogList() {
                     <span>{new Date(blog.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <div className="flex gap-4 items-center">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--text-primary)]">{blog.likes - blog.dislikes}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Score</div>
+                <div className="flex gap-6 items-center">
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
+                    <svg className="w-4 h-4 text-[var(--cyan)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 15l7-7 7 7" />
+                    </svg>
+                    <span className="font-mono font-bold text-sm">{blog.likes - blog.dislikes}</span>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-[var(--text-primary)]">{blog.comment_count}</div>
-                    <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">Comments</div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--surface-2)] rounded-lg border border-[var(--border)]">
+                    <svg className="w-4 h-4 text-[var(--text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span className="font-mono font-bold text-sm">{blog.comment_count}</span>
                   </div>
                 </div>
               </div>

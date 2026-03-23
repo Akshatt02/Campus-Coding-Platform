@@ -54,7 +54,7 @@ export default function BlogEditor() {
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-4">
-      <h1 className="text-4xl font-extrabold mb-10 bg-gradient-to-r from-[var(--cyan)] to-[var(--emerald)] bg-clip-text text-transparent">
+      <h1 className="text-4xl font-extrabold mb-10 gradient-text">
         {id ? 'Edit Blog' : 'Create New Blog'}
       </h1>
 

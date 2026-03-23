@@ -61,8 +61,11 @@ export default function FacultyMyContests() {
                 {/* Using default (dark) text color */}
                 <h3 className="text-xl font-semibold">{c.title}</h3>
                 {/* Using 'muted' class for secondary text */}
-                <p className="text-sm muted mt-1">
-                  {formatDateTime(c.start_time)} →{' '}
+                <p className="text-sm text-[var(--text-secondary)] mt-1 flex items-center gap-2">
+                  {formatDateTime(c.start_time)}
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                   {formatDateTime(c.end_time)}
                 </p>
               </div>

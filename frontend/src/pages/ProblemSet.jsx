@@ -5,19 +5,12 @@ import { Link } from 'react-router-dom';
 
 // Helper function to get a color-coded style for the difficulty badge
 const getDifficultyStyle = (difficulty) => {
-  if (!difficulty) return 'badge'; // Default
-
+  if (!difficulty) return 'badge-default';
   const d = difficulty.toLowerCase();
-  if (d === 'easy') {
-    return '!bg-green-100 !text-green-700'; // Green
-  }
-  if (d === 'medium') {
-    return '!bg-yellow-100 !text-yellow-700'; // Yellow
-  }
-  if (d === 'hard') {
-    return '!bg-red-100 !text-red-700'; // Red
-  }
-  return 'badge'; // Default badge style from theme.css
+  if (d === 'easy') return 'badge-green';
+  if (d === 'medium') return 'badge-amber';
+  if (d === 'hard') return 'badge-red';
+  return 'badge-default';
 };
 
 export default function ProblemSet() {
@@ -56,20 +49,21 @@ export default function ProblemSet() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Problem Set</h1>
+    <div className="anim-fade-in space-y-8" style={{ padding: '24px 0' }}>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-4xl font-extrabold tracking-tight">Problem Set</h1>
+        <p className="text-[var(--text-secondary)]">Sharpen your skills with our curated collection of coding challenges.</p>
+      </div>
 
       {/* Filter Card */}
-      <div className="card p-6">
+      <div className="card p-8">
         <form
           onSubmit={submitFilter}
-          className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end"
+          className="grid grid-cols-1 md:grid-cols-7 gap-6 items-end"
         >
           {/* Search */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1 muted">
-              Search
-            </label>
+            <label className="form-label">Search</label>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -80,9 +74,7 @@ export default function ProblemSet() {
 
           {/* Difficulty */}
           <div>
-            <label className="block text-sm font-medium mb-1 muted">
-              Difficulty
-            </label>
+            <label className="form-label">Difficulty</label>
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
@@ -105,9 +97,7 @@ export default function ProblemSet() {
 
           {/* Tags */}
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-1 muted">
-              Tags (comma separated)
-            </label>
+            <label className="form-label">Tags</label>
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
@@ -125,61 +115,73 @@ export default function ProblemSet() {
 
       {/* Loading State */}
       {loading && (
-        <div className="card p-8 text-center muted">Loading problems...</div>
+        <div className="card p-12 text-center">
+             <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+             <div className="muted">Loading problems...</div>
+        </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="card p-6 bg-red-100 text-red-700 max-w-lg mx-auto text-center">
+        <div className="card p-6 bg-[rgba(239,68,68,0.1)] text-[var(--red)] border-[rgba(239,68,68,0.2)] max-w-lg mx-auto text-center">
           {error}
         </div>
       )}
 
       {/* Empty State */}
       {!loading && !error && problems.length === 0 && (
-        <div className="card p-8 text-center muted">
-          No problems match your filter.
+        <div className="card p-12 text-center">
+          <div className="muted mb-2">No problems match your current filters.</div>
+          <button onClick={() => { setQ(''); setDifficulty(''); setTags(''); load(); }} className="btn btn-ghost btn-sm">Clear all filters</button>
         </div>
       )}
 
       {/* Problem List */}
       {!loading && !error && problems.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-6">
           {problems.map((p) => (
-            <div key={p.id} className="card p-5">
+            <div key={p.id} className="card p-6 hover:border-[var(--border-accent)] transition-colors group">
               <div className="flex justify-between items-start">
-                {/* Left Side: Info */}
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">{p.title}</h3>
-                  <div className="flex gap-2">
-                    <span
-                      className={`badge !font-bold ${getDifficultyStyle(
-                        p.difficulty
-                      )}`}
-                    >
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-[var(--cyan)] transition-colors">{p.title}</h3>
+                  <div className="flex items-center gap-3">
+                    <span className={`badge ${getDifficultyStyle(p.difficulty)}`}>
                       {p.difficulty}
                     </span>
-                    <span className="badge">
-                      AC: {p.ac_percent ?? 0}%
-                    </span>
+                    <div className="flex items-center gap-1 text-xs font-mono muted">
+                        <svg className="w-3.5 h-3.5 text-[var(--emerald)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                        {p.ac_percent ?? 0}%
+                    </div>
                   </div>
+                  {p.tags && (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                          {p.tags.split(',').map(tag => (
+                              <span key={tag} className="text-[10px] uppercase tracking-wider font-bold py-1 px-2 rounded bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border)]">
+                                  {tag.trim()}
+                              </span>
+                          ))}
+                      </div>
+                  )}
                 </div>
 
-                {/* Right Side: Button */}
-                <div className="flex flex-col gap-2">
-                  <Link
-                    to={`/problems/${p.id}`}
-                    state={{ problem: p }}
-                    className="btn btn-primary"
-                  >
-                    View
-                  </Link>
-                </div>
+                <Link
+                  to={`/problems/${p.id}`}
+                  state={{ problem: p }}
+                  className="btn btn-secondary btn-sm"
+                >
+                  View
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               </div>
             </div>
           ))}
         </div>
       )}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

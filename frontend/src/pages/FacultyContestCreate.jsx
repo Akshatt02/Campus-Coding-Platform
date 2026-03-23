@@ -29,10 +29,10 @@ export default function FacultyContestCreate() {
     const isSuccess = message.type === 'success';
     return (
       <div
-        className={`mb-4 p-3 rounded-md ${
+        className={`mb-4 p-3 rounded-md border ${
           isSuccess
-            ? 'bg-green-100 text-green-700'
-            : 'bg-red-100 text-red-700'
+            ? 'bg-[rgba(16,185,129,0.1)] text-[var(--emerald)] border-[rgba(16,185,129,0.2)]'
+            : 'bg-[rgba(239,68,68,0.1)] text-[var(--red)] border-[rgba(239,68,68,0.2)]'
         } text-sm`}
       >
         {message.text}
@@ -245,19 +245,24 @@ export default function FacultyContestCreate() {
                   <button
                     type="button"
                     onClick={() => removeTestcase(index)}
-                    className="btn btn-ghost text-red-600 hover:text-red-800"
+                    className="btn btn-ghost !p-2 text-[var(--red)] hover:bg-[rgba(239,68,68,0.1)]"
                     disabled={problem.testcases.length <= 1}
                   >
-                    ✕
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               ))}
               <button
                 type="button"
                 onClick={addTestcase}
-                className="btn btn-ghost text-blue-600 hover:text-blue-800"
+                className="btn btn-secondary w-full text-xs py-2"
               >
-                + Add Test Case
+                <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Test Case
               </button>
             </div>
 
@@ -271,9 +276,12 @@ export default function FacultyContestCreate() {
       {/* Navigation Button */}
       <button
         onClick={() => navigate('/faculty/my-contests')}
-        className="btn btn-ghost w-full"
+        className="btn btn-ghost w-full flex items-center justify-center gap-2"
       >
-        View My Contests →
+        View My Contests
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
       </button>
     </div>
   );

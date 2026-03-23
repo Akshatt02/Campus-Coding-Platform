@@ -50,13 +50,18 @@ export default function ContestProblems({ contestId, onSubmit, registered }) {
 
   // Styled loading state
   if (loading) {
-    return <div className="p-8 text-center muted">Loading problems...</div>;
+    return (
+        <div className="card p-12 text-center">
+            <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div className="muted">Loading problems...</div>
+        </div>
+    );
   }
 
   // Styled error state
   if (error) {
     return (
-      <div className="p-6 bg-red-100 text-red-700 text-sm rounded-md">
+      <div className="card p-6 bg-[rgba(239,68,68,0.1)] text-[var(--red)] border-[rgba(239,68,68,0.2)] text-sm text-center">
         {error}
       </div>
     );
@@ -64,7 +69,7 @@ export default function ContestProblems({ contestId, onSubmit, registered }) {
 
   // Styled not found state
   if (!contest) {
-    return <div className="p-8 text-center muted">Contest not found</div>;
+    return <div className="card p-12 text-center muted">Contest not found</div>;
   }
 
   const now = new Date();
@@ -75,39 +80,55 @@ export default function ContestProblems({ contestId, onSubmit, registered }) {
   const canSubmit = isOngoing;
 
   return (
-    <div className="space-y-4">
-      {/* Header card - now part of the component, not the parent */}
-      <div className="card p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <h2 className="text-xl font-bold">Contest Problems</h2>
-          <div className="text-sm muted">
-            {formatDateTime(contest.start_time)} → {formatDateTime(contest.end_time)}
+    <div className="space-y-6">
+      {/* Header card */}
+      <div className="card p-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Contest Problems</h2>
+            <span className={`badge ${isOngoing ? 'badge-green' : isPast ? 'badge-default' : 'badge-cyan'}`}>
+                {isOngoing ? 'Live' : isPast ? 'Ended' : 'Upcoming'}
+            </span>
+          </div>
+          <div className="text-sm font-mono muted bg-[var(--surface-2)] px-3 py-1.5 rounded-lg border border-[var(--border)]">
+            <span className="text-[var(--cyan)]">{formatDateTime(contest.start_time)}</span>
+            <span className="mx-2 opacity-30">→</span>
+            <span className="text-[var(--emerald)]">{formatDateTime(contest.end_time)}</span>
           </div>
         </div>
 
-        <input
-          type="text"
-          placeholder="🔍 Search by problem name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="form-input mt-4 w-full"
-        />
+        <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search problems by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="form-input !pl-11"
+            />
+        </div>
 
         {/* Styled Info/Warning Messages */}
         {!canSubmit && isPast && (
-          <div className="mt-3 p-3 text-sm bg-gray-100 text-gray-700 rounded-md">
-            Contest finished — submissions closed.
+          <div className="mt-6 p-4 text-sm bg-gray-500/5 text-gray-400 rounded-xl border border-gray-500/10 flex items-center gap-3">
+             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+             Contest finished — submissions closed.
           </div>
         )}
         {!canSubmit && !isPast && (
-          <div className="mt-3 p-3 text-sm bg-sky-100 text-sky-700 rounded-md">
-            Contest not started yet.
+          <div className="mt-6 p-4 text-sm bg-[var(--cyan-dim)] text-[var(--cyan)] rounded-xl border border-[var(--cyan-glow)] flex items-center gap-3">
+             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+             Contest has not started yet.
           </div>
         )}
         {user && user.role === 'user' && !registered && (
-          <div className="mt-3 p-3 text-sm bg-yellow-100 text-yellow-700 rounded-md">
-            You are not registered for this contest. Please register from the
-            contest header to submit solutions.
+          <div className="mt-6 p-4 text-sm bg-[rgba(245,158,11,0.1)] text-[var(--amber)] rounded-xl border border-[rgba(245,158,11,0.2)] flex items-center gap-3">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            You are not registered for this contest. Please register to submit solutions.
           </div>
         )}
       </div>
@@ -121,23 +142,34 @@ export default function ContestProblems({ contestId, onSubmit, registered }) {
         {filtered.map((p) => (
           <div
             key={p.id}
-            className="card p-4 flex flex-col md:flex-row md:items-center md:justify-between"
+            className="card p-5 flex flex-col md:flex-row md:items-center md:justify-between group hover:border-[var(--border-accent)] transition-all"
           >
             <div>
-              <div className="font-semibold">{p.title}</div>
-              <div className="text-sm muted capitalize">
-                Difficulty: {p.difficulty}{' '}
-                {p.tags ? `| Tags: ${p.tags}` : ''}
+              <div className="text-lg font-bold group-hover:text-[var(--cyan)] transition-colors">{p.title}</div>
+              <div className="text-xs font-mono muted uppercase tracking-wider mt-1 flex items-center gap-3">
+                <span className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${p.difficulty === 'easy' ? 'bg-[var(--emerald)]' : p.difficulty === 'hard' ? 'bg-[var(--red)]' : 'bg-[var(--amber)]'}`} />
+                    {p.difficulty}
+                </span>
+                {p.tags && (
+                    <>
+                        <span className="opacity-30">|</span>
+                        <span>{p.tags}</span>
+                    </>
+                )}
               </div>
             </div>
 
-            <div className="mt-3 md:mt-0">
+            <div className="mt-4 md:mt-0">
               <button
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 onClick={() => setSelectedProblemId(p.id)}
                 disabled={!canSubmit || !registered}
               >
                 Solve
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
               </button>
             </div>
           </div>

@@ -58,7 +58,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
         try {
           const data = await api.fetchTestcases(problemId, token);
           
-          setTestCases(data);;
+          setTestCases(data);
         } catch (error) {
           console.error('Failed to load testcases:', error);
           // Fallback to hardcoded
@@ -177,29 +177,31 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
   };
 
   return (
-    <div className="card p-6 space-y-4">
-      <h3 className="text-xl font-semibold">Code Editor</h3>
-
-      {/* Language Selector */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Language:</label>
-        <select
-          value={language}
-          onChange={(e) => handleLanguageChange(e.target.value)}
-          className="form-select"
-        >
-          {Object.entries(LANGUAGES).map(([key, lang]) => (
-            <option key={key} value={key}>
-              {lang.name}
-            </option>
-          ))}
-        </select>
+    <div className="card p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-bold tracking-tight">Code Editor</h3>
+        
+        {/* Language Selector */}
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-bold uppercase tracking-widest muted">Language</label>
+          <select
+            value={language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className="form-select text-sm !py-1.5 !pr-10 !bg-[var(--surface-2)]"
+          >
+            {Object.entries(LANGUAGES).map(([key, lang]) => (
+              <option key={key} value={key}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Monaco Editor */}
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border border-[var(--border)] rounded-xl overflow-hidden shadow-2xl">
         <Editor
-          height="400px"
+          height="450px"
           language={language}
           value={code}
           onChange={setCode}
@@ -211,159 +213,159 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
             roundedSelection: false,
             scrollBeyondLastLine: false,
             automaticLayout: true,
+            padding: { top: 16, bottom: 16 }
           }}
         />
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-2">
-        <button
-          onClick={runCode}
-          disabled={isLoading}
-          className="btn btn-secondary"
-        >
-          {isLoading ? 'Running...' : 'Run Code'}
-        </button>
-        <button
-          onClick={runTestCases}
-          disabled={isLoading}
-          className="btn btn-primary"
-        >
-          {isLoading ? 'Running...' : 'Submit'}
-        </button>
-      </div>
-
-      {/* Final Message */}
-      {finalMessage && (
-        <div className={`p-2 rounded text-sm ${
-          finalMessage.includes('Successfully') || finalMessage.includes('Saved')
-            ? 'bg-green-100 text-green-700'
-            : 'bg-yellow-100 text-yellow-700'
-        }`}>
-          {finalMessage}
-        </div>
-      )}
-
-      {/* Status */}
-      {status && (
-        <div className={`p-2 rounded text-sm ${
-          status === 'Accepted' ? 'bg-green-100 text-green-700' :
-          status === 'Wrong Answer' ? 'bg-red-100 text-red-700' :
-          status === 'Runtime Error' ? 'bg-orange-100 text-orange-700' :
-          status === 'Compilation Error' ? 'bg-purple-100 text-purple-700' :
-          status === 'Time Limit Exceeded' ? 'bg-indigo-100 text-indigo-700' :
-          'bg-yellow-100 text-yellow-700'
-        }`}>
-          {status === 'Accepted' ? '✔ ' : 
-           status === 'Wrong Answer' ? '❌ ' : 
-           status === 'Runtime Error' ? '⚠ ' :
-           status === 'Compilation Error' ? '🔴 ' :
-           status === 'Time Limit Exceeded' ? '⏱ ' :
-           '⚠ '}
-          {status}
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div className="border-b">
-        <div className="flex space-x-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex gap-3">
           <button
-            onClick={() => setActiveTab('input')}
-            className={`py-2 px-4 ${activeTab === 'input' ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={runCode}
+            disabled={isLoading}
+            className="btn btn-secondary px-8"
           >
-            Input
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            ) : 'Run Code'}
           </button>
           <button
-            onClick={() => setActiveTab('output')}
-            className={`py-2 px-4 ${activeTab === 'output' ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={runTestCases}
+            disabled={isLoading}
+            className="btn btn-primary px-8"
           >
-            Output
-          </button>
-          <button
-            onClick={() => setActiveTab('tests')}
-            className={`py-2 px-4 ${activeTab === 'tests' ? 'border-b-2 border-blue-500' : ''}`}
-          >
-            Test Results
+            {isLoading ? (
+              <div className="w-4 h-4 border-2 border-[var(--bg)] border-t-transparent rounded-full animate-spin" />
+            ) : 'Submit'}
           </button>
         </div>
-      </div>
 
-      {/* Tab Content */}
-      <div className="mt-4">
-        {activeTab === 'input' && (
-          <div>
-            <label className="block text-sm font-medium mb-2">Custom Input:</label>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="w-full h-32 p-2 border rounded font-mono text-sm"
-              placeholder="Enter input for Run Code..."
-            />
+        {/* Status Mini Display */}
+        {(status || finalMessage) && (
+          <div className="flex items-center gap-3 anim-fade-in">
+            {status && (
+              <span className={`badge font-bold px-3 py-1 uppercase tracking-widest text-[10px] ${
+                status === 'Accepted' ? 'badge-green' :
+                status === 'Wrong Answer' ? 'badge-red' :
+                status === 'Runtime Error' ? 'badge-violet' :
+                status === 'Compilation Error' ? 'badge-amber' :
+                status === 'Time Limit Exceeded' ? 'badge-blue' :
+                'badge-default'
+              }`}>
+                {status === 'Accepted' ? '✔ ' : '⚠ '}
+                {status}
+              </span>
+            )}
+            {finalMessage && (
+              <span className="text-xs font-medium muted italic">
+                {finalMessage}
+              </span>
+            )}
           </div>
         )}
+      </div>
 
-        {activeTab === 'output' && (
-          <div>
-            <label className="block text-sm font-medium mb-2">Output:</label>
-            <pre className="w-full h-32 p-2 bg-gray-100 border rounded font-mono text-sm overflow-auto">
-              {output}
-            </pre>
-          </div>
-        )}
+      {/* Tabs System */}
+      <div className="space-y-4">
+        <div className="flex gap-1 p-1 bg-[var(--surface-2)] rounded-lg w-fit">
+          {[
+            { id: 'input', label: 'Custom Input' },
+            { id: 'output', label: 'Terminal Output' },
+            { id: 'tests', label: `Test Results ${testResults.length > 0 ? `(${testResults.filter(r => r.passed).length}/${testResults.length})` : ''}` }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${
+                activeTab === tab.id 
+                  ? 'bg-[var(--surface-3)] text-[var(--cyan)] shadow-sm' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)]/50'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {activeTab === 'tests' && (
-          <div>
-            <h4 className="text-lg font-medium mb-2">Test Cases</h4>
-            <div className="space-y-2">
-              {testCases.map((test, index) => (
-                <div key={index} className="border rounded p-2">
-                  <div className="text-sm">
-                    <strong>Input:</strong> {test.input}
-                  </div>
-                  <div className="text-sm">
-                    <strong>Expected:</strong> {test.expected}
-                  </div>
-                </div>
-              ))}
+        <div className="anim-fade-in">
+          {activeTab === 'input' && (
+            <div className="space-y-3">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="w-full h-32 p-4 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] focus:border-[var(--cyan)] transition-colors outline-none"
+                placeholder="Enter custom input for 'Run Code'..."
+              />
             </div>
-            {testResults.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-lg font-medium mb-2">Results</h4>
-                <div className="space-y-2">
+          )}
+
+          {activeTab === 'output' && (
+            <div className="space-y-3">
+              <pre className="w-full h-32 p-4 bg-[#0d1321] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] overflow-auto scroll-smooth">
+                {output || 'No output to show. Run your code to see results.'}
+              </pre>
+            </div>
+          )}
+
+          {activeTab === 'tests' && (
+            <div className="space-y-4 h-64 overflow-auto pr-2 custom-scrollbar">
+              {testResults.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl muted italic">
+                  Run 'Submit' to see test case results
+                </div>
+              ) : (
+                <div className="grid gap-3">
                   {testResults.map((result, index) => (
-                    <div key={index} className={`border rounded p-2 ${
-                      result.passed ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'
+                    <div key={index} className={`p-4 border rounded-xl transition-all ${
+                      result.passed 
+                        ? 'bg-[rgba(16,185,129,0.03)] border-[rgba(16,185,129,0.2)]' 
+                        : 'bg-[rgba(239,68,68,0.03)] border-[rgba(239,68,68,0.2)]'
                     }`}>
-                      <div className="text-sm">
-                        <strong>Test {result.index}:</strong> {result.passed ? '✔ Passed' : '❌ Failed'}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                            result.passed ? 'bg-[var(--emerald)] text-[var(--bg)]' : 'bg-[var(--red)] text-white'
+                          }`}>
+                            {result.index}
+                          </span>
+                          <span className="font-bold text-sm">Test Case {result.index}</span>
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-tighter sm:tracking-widest ${
+                          result.passed ? 'text-[var(--emerald)]' : 'text-[var(--red)]'
+                        }`}>
+                          {result.passed ? '✔ Passed' : '❌ Failed'}
+                        </span>
                       </div>
-                      <div className="text-sm">
-                        <strong>Status:</strong> {result.status || (result.passed ? 'Accepted' : 'Wrong Answer')}
-                      </div>
-                      <div className="text-sm">
-                        <strong>Verdict:</strong> {getVerdict(result.status || (result.passed ? 'Accepted' : 'Wrong Answer'))}
-                      </div>
-                      <div className="text-sm">
-                        <strong>Input:</strong> {result.input}
-                      </div>
-                      <div className="text-sm">
-                        <strong>Expected:</strong> {result.expected}
-                      </div>
-                      <div className="text-sm">
-                        <strong>Actual:</strong> {result.actual}
+                      
+                      <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                        <div className="space-y-1">
+                          <div className="muted text-[9px] uppercase">Input</div>
+                          <div className="bg-[var(--bg-2)] p-2 rounded border border-[var(--border)] truncate">{result.input}</div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="muted text-[9px] uppercase">Expected</div>
+                          <div className="bg-[var(--bg-2)] p-2 rounded border border-[var(--border)] truncate">{result.expected}</div>
+                        </div>
+                        <div className="col-span-2 space-y-1">
+                          <div className="muted text-[9px] uppercase">Actual Output</div>
+                          <div className={`p-2 rounded border ${result.passed ? 'bg-[var(--bg-2)] border-[var(--border)]' : 'bg-[rgba(239,68,68,0.1)] border-[rgba(239,68,68,0.2)] text-[var(--red)]'}`}>
+                            {result.actual || 'No output'}
+                          </div>
+                        </div>
                       </div>
                       {result.error && (
-                        <div className="text-sm text-red-600">
+                        <div className="mt-3 p-2 bg-[rgba(239,68,68,0.1)] rounded border border-[rgba(239,68,68,0.2)] text-[10px] text-[var(--red)] font-mono">
                           <strong>Error:</strong> {result.error}
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
