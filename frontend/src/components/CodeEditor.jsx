@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Editor from '@monaco-editor/react';
 import api from '../api';
+import AuthContext from '../context/AuthContext';
 
 const LANGUAGES = {
   javascript: { id: 63, name: 'JavaScript' },
@@ -36,7 +37,20 @@ const TEST_CASES = [
   { input: "10 20", expected: "30" }
 ];
 
+const VERDICT_MAP = {
+  'Accepted': 'AC',
+  'Wrong Answer': 'WA',
+  'Time Limit Exceeded': 'TLE',
+  'Runtime Error': 'RE',
+  'Compilation Error': 'CE'
+};
+
+const getVerdict = (status) => {
+  return VERDICT_MAP[status] || status;
+};
+
 export default function CodeEditor({ problemId }) {
+  const { token } = useContext(AuthContext);
   const [code, setCode] = useState(DEFAULT_CODE.javascript);
   const [language, setLanguage] = useState('javascript');
   const [input, setInput] = useState('');
@@ -46,12 +60,12 @@ export default function CodeEditor({ problemId }) {
   const [activeTab, setActiveTab] = useState('input');
   const [testResults, setTestResults] = useState([]);
   const [testCases, setTestCases] = useState([]);
+  const [finalMessage, setFinalMessage] = useState('');
 
   useEffect(() => {
     const loadTestCases = async () => {
       if (problemId) {
         try {
-        const token = localStorage.getItem('token');
           const data = await api.fetchTestcases(problemId, token);
           
           setTestCases(data);;
@@ -82,11 +96,13 @@ export default function CodeEditor({ problemId }) {
   const runCode = async () => {
     setIsLoading(true);
     setStatus('Running...');
+    setFinalMessage('');
     try {
       const response = await api.submitCode(code, LANGUAGES[language].id, input);
       const result = await api.getResult(response.token);
       setOutput(result.output || result.error || 'No output');
       setStatus(result.status);
+      setFinalMessage('✅ Successfully Executed');
     } catch (error) {
       setOutput('Error: ' + error.message);
       setStatus('Error');
@@ -99,9 +115,11 @@ export default function CodeEditor({ problemId }) {
     setIsLoading(true);
     setStatus('Running tests...');
     setTestResults([]);
+    setFinalMessage('');
 
     const results = [];
     let allPassed = true;
+    let verdictStatus = 'Accepted';
 
     for (let i = 0; i < testCases.length; i++) {
       const testCase = testCases[i];
@@ -113,16 +131,22 @@ export default function CodeEditor({ problemId }) {
         const expectedOutput = testCase.expected.trim().replace(/\s+/g, ' ');
 
         const passed = actualOutput === expectedOutput;
+        const testStatus = result.status || (passed ? 'Accepted' : 'Wrong Answer');
+        
         results.push({
           index: i + 1,
           input: testCase.input,
           expected: testCase.expected,
           actual: result.output || '',
           passed,
+          status: testStatus,
           error: result.error || ''
         });
 
-        if (!passed) allPassed = false;
+        if (!passed) {
+          allPassed = false;
+          verdictStatus = testStatus !== 'Accepted' ? testStatus : 'Wrong Answer';
+        }
       } catch (error) {
         results.push({
           index: i + 1,
@@ -130,14 +154,31 @@ export default function CodeEditor({ problemId }) {
           expected: testCase.expected,
           actual: '',
           passed: false,
+          status: 'Runtime Error',
           error: error.message
         });
         allPassed = false;
+        verdictStatus = 'Runtime Error';
       }
     }
 
     setTestResults(results);
-    setStatus(allPassed ? 'Accepted' : 'Wrong Answer');
+    setStatus(verdictStatus);
+    
+    // Store submission in database
+    if (problemId && token) {
+      try {
+        await api.createSubmission(token, {
+          problem_id: problemId,
+          verdict: getVerdict(verdictStatus)
+        });
+        setFinalMessage(`Verdict: ${getVerdict(verdictStatus)}`);
+      } catch (error) {
+        console.error('Failed to save submission:', error);
+        setFinalMessage(`⚠ Results: ${getVerdict(verdictStatus)} (submission not saved)`);
+      }
+    }
+    
     setIsLoading(false);
   };
 
@@ -198,14 +239,33 @@ export default function CodeEditor({ problemId }) {
         </button>
       </div>
 
+      {/* Final Message */}
+      {finalMessage && (
+        <div className={`p-2 rounded text-sm ${
+          finalMessage.includes('Successfully') || finalMessage.includes('Saved')
+            ? 'bg-green-100 text-green-700'
+            : 'bg-yellow-100 text-yellow-700'
+        }`}>
+          {finalMessage}
+        </div>
+      )}
+
       {/* Status */}
       {status && (
         <div className={`p-2 rounded text-sm ${
           status === 'Accepted' ? 'bg-green-100 text-green-700' :
           status === 'Wrong Answer' ? 'bg-red-100 text-red-700' :
+          status === 'Runtime Error' ? 'bg-orange-100 text-orange-700' :
+          status === 'Compilation Error' ? 'bg-purple-100 text-purple-700' :
+          status === 'Time Limit Exceeded' ? 'bg-indigo-100 text-indigo-700' :
           'bg-yellow-100 text-yellow-700'
         }`}>
-          {status === 'Accepted' ? '✔ ' : status === 'Wrong Answer' ? '❌ ' : '⚠ '}
+          {status === 'Accepted' ? '✔ ' : 
+           status === 'Wrong Answer' ? '❌ ' : 
+           status === 'Runtime Error' ? '⚠ ' :
+           status === 'Compilation Error' ? '🔴 ' :
+           status === 'Time Limit Exceeded' ? '⏱ ' :
+           '⚠ '}
           {status}
         </div>
       )}
@@ -277,9 +337,17 @@ export default function CodeEditor({ problemId }) {
                 <h4 className="text-lg font-medium mb-2">Results</h4>
                 <div className="space-y-2">
                   {testResults.map((result, index) => (
-                    <div key={index} className={`border rounded p-2 ${result.passed ? 'bg-green-50' : 'bg-red-50'}`}>
+                    <div key={index} className={`border rounded p-2 ${
+                      result.passed ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'
+                    }`}>
                       <div className="text-sm">
                         <strong>Test {result.index}:</strong> {result.passed ? '✔ Passed' : '❌ Failed'}
+                      </div>
+                      <div className="text-sm">
+                        <strong>Status:</strong> {result.status || (result.passed ? 'Accepted' : 'Wrong Answer')}
+                      </div>
+                      <div className="text-sm">
+                        <strong>Verdict:</strong> {getVerdict(result.status || (result.passed ? 'Accepted' : 'Wrong Answer'))}
                       </div>
                       <div className="text-sm">
                         <strong>Input:</strong> {result.input}
