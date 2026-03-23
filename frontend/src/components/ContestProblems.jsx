@@ -132,13 +132,15 @@ export default function ContestProblems({ contestId, onSubmit, registered }) {
             </div>
 
             <div className="mt-3 md:mt-0">
-              <button
-                className="btn btn-primary"
-                onClick={() => setSelectedProblemId(p.id)}
-                disabled={!canSubmit || !registered}
-              >
-                Solve
-              </button>
+              {user && user.role !== 'admin' && user.role !== 'faculty' && user.id !== contest.created_by && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setSelectedProblemId(p.id)}
+                  disabled={!canSubmit || !registered}
+                >
+                  Solve
+                </button>
+              )}
             </div>
           </div>
         ))}

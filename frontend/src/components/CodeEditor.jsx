@@ -22,20 +22,10 @@ print(add(2, 3))`,
   cpp: `#include <iostream>
 using namespace std;
 
-int add(int a, int b) {
-    return a + b;
-}
-
 int main() {
-    cout << add(2, 3) << endl;
-    return 0;
+  
 }`
 };
-
-const TEST_CASES = [
-  { input: "2 3", expected: "5" },
-  { input: "10 20", expected: "30" }
-];
 
 const VERDICT_MAP = {
   'Accepted': 'AC',
@@ -102,7 +92,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
       const result = await api.getResult(response.token);
       setOutput(result.output || result.error || 'No output');
       setStatus(result.status);
-      setFinalMessage('✅ Successfully Executed');
+      setFinalMessage('Successfully Executed');
     } catch (error) {
       setOutput('Error: ' + error.message);
       setStatus('Error');
@@ -165,7 +155,6 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
     setTestResults(results);
     setStatus(verdictStatus);
     
-    // Store submission in database
     if (problemId && token) {
       try {
         const submissionData = {
@@ -180,7 +169,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
         if (onSubmit) onSubmit();
       } catch (error) {
         console.error('Failed to save submission:', error);
-        setFinalMessage(`⚠ Results: ${getVerdict(verdictStatus)} (submission not saved)`);
+        setFinalMessage(`Results: ${getVerdict(verdictStatus)} (submission not saved)`);
       }
     }
     

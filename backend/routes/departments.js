@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
 router.get('/department/:dept', authenticateFaculty, async (req, res) => {
   try {
     const dept = req.params.dept;
-    console.log("Fetching users for department:", dept);
     const [rows] = await pool.query(
       `SELECT id, name, email, rating, batch
        FROM users
