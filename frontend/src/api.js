@@ -258,30 +258,8 @@ export const createProblem = async (token, payload) => {
   return data;
 };
 
-export const createProblemAdmin = async (token, payload) => {
-  const res = await fetch(`${BASE}/api/admin/contests/problems`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(payload),
-  });
-  const data = await json(res);
-  if (!res.ok) throw data;
-  return data;
-};
-
 export const addProblemToContest = async (token, contestId, problemId) => {
   const res = await fetch(`${BASE}/api/faculty/contests/${contestId}/problems`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ problemId }),
-  });
-  const data = await json(res);
-  if (!res.ok) throw data;
-  return data;
-};
-
-export const addProblemToContestAdmin = async (token, contestId, problemId) => {
-  const res = await fetch(`${BASE}/api/admin/contests/${contestId}/problems`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ problemId }),
@@ -462,6 +440,4 @@ export default {
   submitCode,
   getResult,
   fetchTestcases,
-  createProblemAdmin,
-  addProblemToContestAdmin,
 };
