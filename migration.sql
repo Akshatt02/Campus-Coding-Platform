@@ -5,6 +5,13 @@ CREATE TABLE departments (
 id INT AUTO_INCREMENT PRIMARY KEY, 
 name VARCHAR(100) NOT NULL UNIQUE 
 ); 
+
+INSERT INTO departments (name) 
+VALUES 
+('CSE'),
+('ECE'),
+('MECH');
+
 CREATE TABLE users ( 
 id INT AUTO_INCREMENT PRIMARY KEY, 
 name VARCHAR(150) NOT NULL, 
@@ -17,6 +24,14 @@ rating INT DEFAULT 1000,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL 
 ); 
+INSERT INTO users (name, email, password, role)
+VALUES (
+  'Admin',
+  'admin@gmail.com',
+  'password', 
+  'admin'
+);
+
 CREATE TABLE problems ( 
 id INT AUTO_INCREMENT PRIMARY KEY, 
 title VARCHAR(255) NOT NULL, 
@@ -84,6 +99,48 @@ expected_output TEXT NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 FOREIGN KEY (problem_id) REFERENCES problems(id) ON DELETE CASCADE 
 ); 
+CREATE TABLE IF NOT EXISTS blogs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content LONGTEXT NOT NULL,
+  author_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Blog Votes Table (Likes/Dislikes)
+CREATE TABLE IF NOT EXISTS blog_votes (
+  blog_id INT NOT NULL,
+  user_id INT NOT NULL,
+  vote TINYINT NOT NULL, -- 1 for like, -1 for dislike
+  PRIMARY KEY (blog_id, user_id),
+  FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Comments Table (Supports nesting via parent_id)
+CREATE TABLE IF NOT EXISTS comments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  blog_id INT NOT NULL,
+  user_id INT NOT NULL,
+  parent_id INT DEFAULT NULL, -- For replies
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+);
+
+-- Comment Likes Table
+CREATE TABLE IF NOT EXISTS comment_likes (
+  comment_id INT NOT NULL,
+  user_id INT NOT NULL,
+  PRIMARY KEY (comment_id, user_id),
+  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- indexes for faster filtering 
 CREATE INDEX idx_problems_diff ON problems (difficulty); 
 CREATE INDEX idx_sub_contest_time ON submissions (contest_id, created_at); 

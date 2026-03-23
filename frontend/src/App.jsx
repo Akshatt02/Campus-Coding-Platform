@@ -20,6 +20,9 @@ import AdminContestEdit from './pages/AdminContestEdit';
 import AdminAnalytics from './pages/AdminAnalytics';
 import FacultyMyContests from './pages/FacultyMyContests';
 import AdminContests from './pages/AdminContests';
+import BlogList from './pages/BlogList';
+import BlogDetail from './pages/BlogDetail';
+import BlogEditor from './pages/BlogEditor';
 import { AuthProvider } from './context/AuthContext';
 
 export default function App() {
@@ -66,6 +69,12 @@ export default function App() {
             {/* Profile */}
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:id" element={<Profile />} />
+
+            {/* Blogs */}
+            <Route path="/blogs" element={<BlogList />} />
+            <Route path="/blogs/create" element={<BlogEditor />} />
+            <Route path="/blogs/:id" element={<BlogDetail />} />
+            <Route path="/blogs/:id/edit" element={<BlogEditor />} />
 
             {/* Fallback */}
             <Route path="*" element={<div className="card">Page not found</div>} />

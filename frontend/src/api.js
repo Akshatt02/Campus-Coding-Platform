@@ -401,6 +401,85 @@ export const deleteContestAdmin = async (token, contestId) => {
   return data;
 };
 
+// Blogs
+export const fetchBlogs = async () => {
+  const res = await fetch(`${BASE}/api/blogs`);
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const fetchBlogById = async (id) => {
+  const res = await fetch(`${BASE}/api/blogs/${id}`);
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const createBlog = async (token, payload) => {
+  const res = await fetch(`${BASE}/api/blogs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const updateBlog = async (token, id, payload) => {
+  const res = await fetch(`${BASE}/api/blogs/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const deleteBlog = async (token, id) => {
+  const res = await fetch(`${BASE}/api/blogs/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const voteBlog = async (token, id, vote) => {
+  const res = await fetch(`${BASE}/api/blogs/${id}/vote`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ vote }),
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const createComment = async (token, blogId, content, parent_id = null) => {
+  const res = await fetch(`${BASE}/api/blogs/${blogId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ content, parent_id }),
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const likeComment = async (token, commentId) => {
+  const res = await fetch(`${BASE}/api/blogs/comments/${commentId}/like`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
 export default {
   login,
   register,
@@ -440,4 +519,12 @@ export default {
   submitCode,
   getResult,
   fetchTestcases,
+  fetchBlogs,
+  fetchBlogById,
+  createBlog,
+  updateBlog,
+  deleteBlog,
+  voteBlog,
+  createComment,
+  likeComment,
 };

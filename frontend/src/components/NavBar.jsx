@@ -37,6 +37,7 @@ export default function NavBar() {
   const studentLinks = [
     { to: '/problems', label: 'Problems' },
     { to: '/contests', label: 'Contests' },
+    { to: '/blogs', label: 'Blogs' },
     { to: '/submissions', label: 'Submissions' },
     { to: '/profile', label: 'Profile' },
   ];
@@ -44,6 +45,7 @@ export default function NavBar() {
   const staffLinks = [
     { to: '/problems', label: 'Problems' },
     { to: '/contests', label: 'Contests' },
+    { to: '/blogs', label: 'Blogs' },
     {
       to: user?.role === 'admin' ? '/admin/analytics' : '/faculty/analytics',
       label: 'Analytics',
