@@ -13,6 +13,7 @@ import facultyContestRoutes from './routes/facultyContests.js';
 import adminContestRoutes from './routes/adminContests.js';
 import adminAnalyticsRoutes from './routes/adminAnalytics.js';
 import codeRoutes from './routes/codeRoutes.js';
+import blogRoutes from './routes/blogs.js';
 
 const app = express();
 app.use(cors());
@@ -28,6 +29,7 @@ app.use('/api/faculty/contests', facultyContestRoutes)
 app.use('/api/admin/contests', adminContestRoutes)
 app.use('/api/admin/analytics', adminAnalyticsRoutes)
 app.use('/api/code', codeRoutes)
+app.use('/api/blogs', blogRoutes);
 
 app.get('/', (req, res) => res.send({ ok: true }));
 
