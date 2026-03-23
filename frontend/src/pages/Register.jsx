@@ -1,150 +1,270 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import api, { fetchDepartments } from '../api';
+
+const STEPS = ['Account', 'Academic', 'Done'];
 
 export default function Register() {
   const { user, setToken, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [step, setStep] = useState(0);
   const [departments, setDepartments] = useState([]);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    department: '',
-    batch: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', password: '', department: '', batch: '' });
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+
+  useEffect(() => { if (user) navigate('/contests'); }, [user, navigate]);
 
   useEffect(() => {
-    if (user) navigate('/contests');
-  }, [user, navigate]);
-
-  useEffect(() => {
-    const loadDepartments = async () => {
-      try {
-        const data = await fetchDepartments();
-        setDepartments(data);
-      } catch (err) {
-        console.error('Error fetching departments:', err);
-        setDepartments([]);
-      }
-    };
-    loadDepartments();
+    fetchDepartments()
+      .then(setDepartments)
+      .catch(() => setDepartments([]));
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const nextStep = (e) => {
+    e.preventDefault();
+    setError(null);
+    if (step === 0) {
+      if (!form.name || !form.email || !form.password) return setError('Please fill all fields.');
+      if (form.password.length < 6) return setError('Password must be at least 6 characters.');
+      setStep(1);
+    }
   };
 
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
+    if (!form.department) return setError('Please select a department.');
+    if (!form.batch) return setError('Please enter your batch year.');
+    setLoading(true);
     try {
-      const res = await api.register({
-        ...formData,
-        department_id: formData.department,
-      });
+      const res = await api.register({ ...form, department_id: form.department });
       setToken(res.token);
       setUser(res.user);
       navigate('/problems');
     } catch (err) {
-      setError(err?.message || JSON.stringify(err));
+      setError(err?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    // Wrapper to center the form on the page
-    <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        {/* Using 'card' class from theme.css */}
-        <div className="card p-6 sm:p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Create Student Account
-          </h2>
+  const progressWidth = ((step) / (STEPS.length - 1)) * 100;
 
-          {/* Styled error message */}
+  return (
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'var(--bg)',
+      padding: '40px 24px',
+      position: 'relative', overflow: 'hidden',
+    }}>
+      {/* Background orbs */}
+      <div style={{
+        position: 'fixed', top: '-30%', left: '-10%',
+        width: 500, height: 500,
+        background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 65%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'fixed', bottom: '-20%', right: '-5%',
+        width: 400, height: 400,
+        background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)',
+        pointerEvents: 'none',
+      }} />
+
+      <div style={{ width: '100%', maxWidth: 460, position: 'relative', zIndex: 1 }}>
+
+        {/* Header */}
+        <div className="anim-fade-up" style={{ textAlign: 'center', marginBottom: 32 }}>
+          <Link to="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: 20 }}>
+            <div style={{
+              width: 52, height: 52,
+              background: 'linear-gradient(135deg, var(--cyan), var(--emerald))',
+              borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 24, fontWeight: 800, color: '#080c14',
+              margin: '0 auto', fontFamily: 'var(--font-display)',
+              boxShadow: '0 0 30px rgba(0,212,255,0.3)',
+            }}>C</div>
+          </Link>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 26, fontWeight: 800,
+            letterSpacing: '-0.02em', marginBottom: 6,
+          }}>
+            Create your account
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
+            Join CodeArena and start competing
+          </p>
+        </div>
+
+        {/* Step progress */}
+        <div className="anim-fade-up delay-1" style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            {STEPS.map((s, i) => (
+              <React.Fragment key={s}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: i <= step ? 'var(--cyan)' : 'var(--surface-2)',
+                    border: `2px solid ${i <= step ? 'var(--cyan)' : 'var(--border)'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, color: i <= step ? '#080c14' : 'var(--text-muted)',
+                    fontFamily: 'var(--font-display)',
+                    transition: 'all 0.3s',
+                    boxShadow: i <= step ? '0 0 12px rgba(0,212,255,0.4)' : 'none',
+                  }}>
+                    {i < step ? '✓' : i + 1}
+                  </div>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, fontFamily: 'var(--font-display)',
+                    letterSpacing: '0.04em', textTransform: 'uppercase',
+                    color: i <= step ? 'var(--text-primary)' : 'var(--text-muted)',
+                  }}>{s}</span>
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div style={{
+                    flex: 1, height: 2, margin: '0 8px', marginBottom: 18,
+                    background: i < step ? 'var(--cyan)' : 'var(--border)',
+                    borderRadius: 2, transition: 'background 0.4s',
+                  }} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        {/* Card */}
+        <div
+          className="anim-fade-up delay-2"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 16,
+            padding: 32,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          }}
+        >
           {error && (
-            <div className="mb-4 p-3 rounded-md bg-red-100 text-red-700 text-sm">
-              {error}
+            <div style={{
+              padding: '10px 14px',
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.25)',
+              borderRadius: 8, marginBottom: 20,
+              color: '#f87171', fontSize: 13,
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span>⚠</span> {error}
             </div>
           )}
 
-          <form onSubmit={submit} className="flex flex-col gap-4">
-            {/* Using new .form-input class */}
-            <input
-              required
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Full Name"
-              className="form-input"
-            />
-            {/* Using new .form-input class */}
-            <input
-              required
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email"
-              className="form-input"
-            />
-            {/* Using new .form-input class */}
-            <input
-              required
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className="form-input"
-            />
+          {step === 0 && (
+            <form onSubmit={nextStep} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div className="form-group">
+                <label className="form-label">Full name</label>
+                <input required className="form-input" placeholder="Arjun Sharma" value={form.name} onChange={e => set('name', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email address</label>
+                <input required type="email" className="form-input" placeholder="you@college.edu" value={form.email} onChange={e => set('email', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    required type={showPass ? 'text' : 'password'}
+                    className="form-input" placeholder="Min. 6 characters"
+                    value={form.password} onChange={e => set('password', e.target.value)}
+                    style={{ paddingRight: 44 }}
+                  />
+                  <button type="button" onClick={() => setShowPass(p => !p)}
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 14, padding: 4 }}>
+                    {showPass ? '🙈' : '👁'}
+                  </button>
+                </div>
+                {/* Password strength */}
+                {form.password.length > 0 && (
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{ height: 3, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{
+                        height: '100%',
+                        width: `${Math.min(100, (form.password.length / 10) * 100)}%`,
+                        background: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#10b981',
+                        borderRadius: 2, transition: 'width 0.3s, background 0.3s',
+                      }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: form.password.length < 6 ? '#f87171' : form.password.length < 10 ? '#f59e0b' : '#10b981', marginTop: 3, display: 'block' }}>
+                      {form.password.length < 6 ? 'Too short' : form.password.length < 10 ? 'Good' : 'Strong'}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ padding: '13px', fontSize: 15, borderRadius: 10, marginTop: 4 }}>
+                Continue →
+              </button>
+            </form>
+          )}
 
-            {/* Using new .form-select and .form-option classes */}
-            <select
-              required
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="form-select"
-            >
-              <option value="" disabled className="form-option">
-                Select Department
-              </option>
-              {departments.map((dept) => (
-                <option
-                  key={dept.id}
-                  value={dept.id}
-                  className="form-option"
-                >
-                  {dept.name}
-                </option>
-              ))}
-            </select>
+          {step === 1 && (
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div className="form-group">
+                <label className="form-label">Department</label>
+                <select className="form-select" value={form.department} onChange={e => set('department', e.target.value)} required>
+                  <option value="" disabled>Select your department</option>
+                  {departments.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Batch year</label>
+                <input
+                  required type="number" className="form-input"
+                  placeholder="e.g. 2022" value={form.batch}
+                  onChange={e => set('batch', e.target.value)}
+                  min="2000" max="2099"
+                />
+              </div>
 
-            {/* Using new .form-input class */}
-            <input
-              required
-              name="batch"
-              value={formData.batch}
-              onChange={handleChange}
-              placeholder="Batch (e.g., 2022)"
-              type="number" // Changed to number for better input
-              min="2000" // Added validation
-              max="2099" // Added validation
-              className="form-input"
-            />
+              {/* Preview */}
+              <div style={{
+                padding: '14px 16px',
+                background: 'var(--bg-2)',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+                fontSize: 13, color: 'var(--text-secondary)',
+              }}>
+                <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{form.name}</div>
+                <div>{form.email}</div>
+              </div>
 
-            {/* Full-width button, using new .btn-primary styles */}
-            <div className="mt-2">
-              <button className="btn btn-primary w-full">Register</button>
-            </div>
-          </form>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button" onClick={() => { setStep(0); setError(null); }}
+                  className="btn btn-ghost" style={{ flex: 1, padding: '13px', borderRadius: 10 }}>
+                  ← Back
+                </button>
+                <button
+                  type="submit" disabled={loading}
+                  className="btn btn-primary" style={{ flex: 2, padding: '13px', borderRadius: 10, opacity: loading ? 0.7 : 1 }}>
+                  {loading ? 'Creating...' : 'Create account'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--text-muted)' }}>
+          Already have an account?{' '}
+          <Link to="/login" style={{ color: 'var(--cyan)', textDecoration: 'none', fontWeight: 600 }}>
+            Sign in
+          </Link>
         </div>
       </div>
     </div>

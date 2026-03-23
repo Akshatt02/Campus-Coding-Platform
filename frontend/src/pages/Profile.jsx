@@ -1,29 +1,126 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../context/AuthContext';
 
-// Helper component for the difficulty blocks
-const DifficultyStat = ({ label, attempted, solved, colorClass }) => (
-  <div
-    className={`p-4 rounded-lg flex-1 ${colorClass} bg-opacity-10 border ${colorClass} border-opacity-20`}
-  >
-    <div
-      className={`text-sm font-bold uppercase ${colorClass} ${colorClass === 'text-gray-500' ? '' : 'text-opacity-70'
-        }`}
+function StatCard({ icon, label, value, sub, color = 'var(--cyan)', accent }) {
+  return (
+    <div style={{
+      background: 'var(--surface)', border: '1px solid var(--border)',
+      borderRadius: 14, padding: '22px 20px',
+      position: 'relative', overflow: 'hidden',
+      transition: 'border-color 0.25s, box-shadow 0.25s',
+    }}
+    onMouseEnter={e => {
+      e.currentTarget.style.borderColor = color;
+      e.currentTarget.style.boxShadow = `0 0 20px ${color}22`;
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.borderColor = 'var(--border)';
+      e.currentTarget.style.boxShadow = 'none';
+    }}
     >
-      {label}
+      <div style={{
+        position: 'absolute', top: 0, right: 0, width: 80, height: 80,
+        background: `radial-gradient(circle at top right, ${color}12, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+      <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
+      <div style={{
+        fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 30,
+        color, lineHeight: 1, marginBottom: 4,
+      }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {label}
+      </div>
+      {sub && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{sub}</div>}
     </div>
-    <div className="text-2xl font-bold mt-1">{solved || 0}</div>
-    <div className="text-sm opacity-70">{attempted || 0} attempted</div>
-  </div>
-);
+  );
+}
+
+function DifficultyBar({ label, attempted, solved, color }) {
+  const pct = attempted > 0 ? Math.round((solved / attempted) * 100) : 0;
+  return (
+    <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            display: 'inline-block', width: 8, height: 8,
+            borderRadius: '50%', background: color,
+            boxShadow: `0 0 6px ${color}`,
+          }} />
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>{label}</span>
+        </div>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{attempted} attempted</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 14, color }}>{solved} solved</span>
+        </div>
+      </div>
+      <div style={{ height: 4, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
+        <div style={{
+          height: '100%', width: `${pct}%`,
+          background: color,
+          borderRadius: 2,
+          boxShadow: `0 0 8px ${color}66`,
+          transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+function TagRow({ name, attempted, solved }) {
+  const pct = attempted > 0 ? Math.round((solved / attempted) * 100) : 0;
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
+      padding: '10px 0', borderBottom: '1px solid var(--border)',
+    }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{name}</span>
+          <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>
+            <span style={{ color: 'var(--cyan)' }}>{solved}</span>/{attempted}
+          </span>
+        </div>
+        <div style={{ height: 3, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', width: `${pct}%`,
+            background: pct > 70 ? 'var(--emerald)' : pct > 40 ? 'var(--cyan)' : '#f59e0b',
+            borderRadius: 2, transition: 'width 0.6s',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getRatingColor(rating) {
+  if (!rating) return 'var(--text-muted)';
+  if (rating >= 2100) return '#f59e0b';
+  if (rating >= 1900) return '#a78bfa';
+  if (rating >= 1700) return 'var(--cyan)';
+  if (rating >= 1500) return 'var(--emerald)';
+  return 'var(--text-secondary)';
+}
+
+function getRatingLabel(rating) {
+  if (!rating) return '';
+  if (rating >= 2100) return 'Grandmaster';
+  if (rating >= 1900) return 'Master';
+  if (rating >= 1700) return 'Expert';
+  if (rating >= 1500) return 'Specialist';
+  return 'Newbie';
+}
 
 export default function Profile() {
-  const { token } = useContext(AuthContext);
+  const { token, user: authUser } = useContext(AuthContext);
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
+  const isOwnProfile = !id || id === String(authUser?.id);
 
   useEffect(() => {
     const load = async () => {
@@ -39,221 +136,252 @@ export default function Profile() {
     if (token) load();
   }, [token, id]);
 
-  // Styled error state
-  if (error) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center">
-        <div className="card p-6 bg-red-100 text-red-700 max-w-md w-full text-center">
-          {error}
-        </div>
+  if (error) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: '20px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#f87171', fontSize: 14 }}>
+        ⚠ {error}
       </div>
-    );
-  }
-
-  // Styled loading state
-  if (!profile) {
-    return (
-      <div className="min-h-[80vh] flex items-center justify-center muted">
-        Loading profile...
-      </div>
-    );
-  }
-
-  const { user, stats, weak_topics } = profile;
-
-  const difficultyCounts = profile.difficulty_counts || [];
-  const tagCounts = profile.tag_counts || [];
-  const contestsCount = profile.contests_count || 0;
-  const contestHistory = profile.contest_history || [];
-  // filter weak topics with >= 40% wrong rate
-  const weakFiltered = (weak_topics || []).filter(
-    (t) => Number(t.wrong_percent) >= 40
+    </div>
   );
 
-  // Helper to find difficulty stats
-  const getDifficulty = (diff) => {
-    return (
-      difficultyCounts.find((r) => (r.difficulty || '').toLowerCase() === diff) || {
-        attempted: 0,
-        solved: 0,
-      }
-    );
-  };
-  const easyStats = getDifficulty('easy');
-  const mediumStats = getDifficulty('medium');
-  const hardStats = getDifficulty('hard');
+  if (!profile) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--text-muted)' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Loading profile...</span>
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+
+  const { user, stats, weak_topics, difficulty_counts = [], tag_counts = [], contests_count = 0, contest_history = [] } = profile;
+  const ratingColor = getRatingColor(user.rating);
+  const ratingLabel = getRatingLabel(user.rating);
+
+  const getDiff = (d) => difficulty_counts.find(r => (r.difficulty || '').toLowerCase() === d) || { attempted: 0, solved: 0 };
+  const weakFiltered = (weak_topics || []).filter(t => Number(t.wrong_percent) >= 40);
 
   return (
-    <div className="space-y-6">
-      {/* Profile Header Card */}
-      <div className="card p-6">
-        <h2 className="text-3xl font-bold">{user.name}</h2>
-        <p className="muted text-lg">
-          {user.department || 'General'} • Batch {user.batch || '-'}
-        </p>
-        <div className="mt-3 flex gap-3">
-          {/* Cleaned up badge styles */}
-          <span className="badge !bg-yellow-100 !text-yellow-800 !font-bold !text-sm">
-            Rating: {user.rating}
-          </span>
-          {/* This uses the default .badge style from theme.css */}
-          <span className="badge !text-sm">{user.role}</span>
-        </div>
-      </div>
+    <div style={{ minHeight: '100vh', padding: '32px 0 60px' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
 
-      {/* Grid for stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Submission Stats */}
-        <div className="card p-6">
-          <h3 className="text-xl mb-3 font-semibold">Submission Stats</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="muted">Total Submissions:</span>
-              <span className="font-bold">{stats.total}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="muted">Accepted:</span>
-              <span className="font-bold text-green-600">{stats.ac}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="muted">Accuracy:</span>
-              <span className="font-bold text-teal-600">
-                {stats.ac_percent}%
-              </span>
-            </div>
-          </div>
-        </div>
+        {/* ── PROFILE HEADER ── */}
+        <div className="anim-fade-up" style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          borderRadius: 20, padding: '28px 32px',
+          marginBottom: 24,
+          position: 'relative', overflow: 'hidden',
+        }}>
+          {/* Background glow */}
+          <div style={{
+            position: 'absolute', top: -40, right: -40,
+            width: 200, height: 200,
+            background: `radial-gradient(circle, ${ratingColor}10 0%, transparent 70%)`,
+            pointerEvents: 'none',
+          }} />
 
-        {/* Contests Count */}
-        <div className="card p-6 flex flex-col justify-center">
-          <h3 className="text-xl mb-3 font-semibold">Contests</h3>
-          <div className="text-5xl font-bold text-cyan-600">
-            {contestsCount}
-          </div>
-          <div className="muted">Contests given</div>
-        </div>
-
-        {/* Weak Topics */}
-        <div className="card p-6">
-          <h3 className="text-xl mb-3 font-semibold">Weak Topics</h3>
-          {weakFiltered.length === 0 ? (
-            <div className="text-green-600">
-              Great going — keep practicing!
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            {/* Avatar */}
+            <div style={{
+              width: 72, height: 72, borderRadius: 18,
+              background: `linear-gradient(135deg, ${ratingColor}, ${ratingColor}88)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 28, fontWeight: 800, color: '#080c14',
+              fontFamily: 'var(--font-display)',
+              boxShadow: `0 0 24px ${ratingColor}44`,
+              flexShrink: 0,
+            }}>
+              {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-          ) : (
-            <>
-              <div className="text-sm text-yellow-600 mb-2">
-                Focus on these tags to improve accuracy
+
+            {/* Info */}
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 6 }}>
+                <h1 style={{
+                  fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 24,
+                  letterSpacing: '-0.02em', margin: 0,
+                }}>
+                  {user.name}
+                </h1>
+                {ratingLabel && (
+                  <span style={{
+                    padding: '3px 10px',
+                    background: `${ratingColor}15`,
+                    border: `1px solid ${ratingColor}40`,
+                    borderRadius: 6,
+                    fontSize: 11, fontWeight: 700,
+                    fontFamily: 'var(--font-display)', letterSpacing: '0.06em',
+                    textTransform: 'uppercase', color: ratingColor,
+                  }}>{ratingLabel}</span>
+                )}
+                {isOwnProfile && (
+                  <span style={{
+                    padding: '3px 10px',
+                    background: 'var(--cyan-dim)',
+                    border: '1px solid rgba(0,212,255,0.25)',
+                    borderRadius: 6,
+                    fontSize: 11, fontWeight: 700,
+                    fontFamily: 'var(--font-display)', letterSpacing: '0.06em',
+                    textTransform: 'uppercase', color: 'var(--cyan)',
+                  }}>You</span>
+                )}
               </div>
-              <div className="space-y-1">
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
+                  {user.department || 'No Department'} · Batch {user.batch || '—'}
+                </span>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                  {user.email}
+                </span>
+              </div>
+            </div>
+
+            {/* Rating big display */}
+            <div style={{ textAlign: 'right' }}>
+              <div style={{
+                fontFamily: 'var(--font-display)', fontWeight: 900,
+                fontSize: 48, lineHeight: 1, color: ratingColor,
+                textShadow: `0 0 30px ${ratingColor}66`,
+              }}>
+                {user.rating ?? '—'}
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', fontFamily: 'var(--font-display)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>
+                Rating
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── STATS GRID ── */}
+        <div className="anim-fade-up delay-1" style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: 12, marginBottom: 24,
+        }}>
+          <StatCard icon="📤" label="Submissions" value={stats.total} color="var(--text-secondary)" />
+          <StatCard icon="✅" label="Accepted" value={stats.ac} color="var(--emerald)" />
+          <StatCard icon="🎯" label="Accuracy" value={`${stats.ac_percent}%`} color={stats.ac_percent > 60 ? 'var(--emerald)' : '#f59e0b'} />
+          <StatCard icon="🏆" label="Contests" value={contests_count} color="var(--cyan)" />
+        </div>
+
+        {/* ── MAIN GRID ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="anim-fade-up delay-2">
+
+          {/* Difficulty Breakdown */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--text-primary)' }}>
+              Difficulty Breakdown
+            </h3>
+            <DifficultyBar label="Easy" {...getDiff('easy')} color="var(--emerald)" />
+            <DifficultyBar label="Medium" {...getDiff('medium')} color="#f59e0b" />
+            <DifficultyBar label="Hard" {...getDiff('hard')} color="#ef4444" />
+          </div>
+
+          {/* Weak Topics */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, marginBottom: 4, color: 'var(--text-primary)' }}>
+              Weak Topics
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+              Topics with ≥40% wrong submissions
+            </p>
+            {weakFiltered.length === 0 ? (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🎉</div>
+                <div style={{ color: 'var(--emerald)', fontWeight: 600, fontFamily: 'var(--font-display)', fontSize: 14 }}>No weak topics found</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 4 }}>Keep up the great work!</div>
+              </div>
+            ) : (
+              <div>
                 {weakFiltered.map((t, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between border-b border-gray-100 py-1"
-                  >
-                    <span className="font-medium">{t.name}</span>
-                    <span className="text-red-600 font-medium">
-                      {t.wrong_percent}% wrong
+                  <div key={i} style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '10px 0', borderBottom: i < weakFiltered.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>
+                      {t.name}
                     </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 60, height: 3, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${t.wrong_percent}%`, background: '#ef4444', borderRadius: 2 }} />
+                      </div>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 12, color: '#f87171', minWidth: 40, textAlign: 'right' }}>
+                        {t.wrong_percent}%
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
-            </>
-          )}
-        </div>
-      </div>
+            )}
+          </div>
 
-      {/* Difficulty Breakdown */}
-      <div className="card p-6">
-        <h3 className="text-xl mb-4 font-semibold">Difficulty Breakdown</h3>
-        <div className="flex flex-col md:flex-row gap-4">
-          <DifficultyStat
-            label="Easy"
-            attempted={easyStats.attempted}
-            solved={easyStats.solved}
-            colorClass="text-green-600"
-          />
-          <DifficultyStat
-            label="Medium"
-            attempted={mediumStats.attempted}
-            solved={mediumStats.solved}
-            colorClass="text-yellow-600"
-          />
-          <DifficultyStat
-            label="Hard"
-            attempted={hardStats.attempted}
-            solved={hardStats.solved}
-            colorClass="text-red-600"
-          />
-        </div>
-      </div>
+          {/* Tag-wise */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--text-primary)' }}>
+              Topics Progress
+            </h3>
+            {tag_counts.length === 0 ? (
+              <div style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: '20px 0' }}>No data yet</div>
+            ) : (
+              <div style={{ maxHeight: 280, overflowY: 'auto', paddingRight: 4 }}>
+                {tag_counts.map(t => <TagRow key={t.name} {...t} />)}
+              </div>
+            )}
+          </div>
 
-      {/* Tag & Contest History Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Tag-wise Problem Counts */}
-        <div className="card p-6">
-          <h3 className="text-xl mb-3 font-semibold">Tag-wise Problem Counts</h3>
-          {tagCounts.length === 0 ? (
-            <div className="muted">No tag data available</div>
-          ) : (
-            <div className="overflow-x-auto max-h-96">
-              <table className="w-full text-left">
-                <thead className="sticky top-0 bg-white">
-                  <tr className="border-b border-gray-200">
-                    <th className="py-2 px-2 font-semibold">Tag</th>
-                    <th className="py-2 px-2 font-semibold">Attempted</th>
-                    <th className="py-2 px-2 font-semibold">Solved</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tagCounts.map((t) => (
-                    <tr
-                      key={t.name}
-                      className="border-b border-gray-100 hover:bg-sky-50"
-                    >
-                      <td className="py-3 px-2 font-medium">{t.name}</td>
-                      <td className="py-3 px-2">{t.attempted}</td>
-
-                      <td className="py-3 px-2 text-green-600 font-medium">
-                        {t.solved}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        {/* Contest History */}
-        <div className="card p-6">
-          <h3 className="text-xl mb-3 font-semibold">Contest History</h3>
-          {contestHistory.length === 0 ? (
-            <div className="muted">No contest history</div>
-          ) : (
-            <div className="space-y-2 max-h-96 overflow-y-auto">
-              {contestHistory.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex justify-between items-center border-b border-gray-100 py-3"
-                >
-                  <div>
-                    <div className="font-semibold">{c.title}</div>
-                    <div className="text-sm muted">
-                      {new Date(c.start_time).toLocaleDateString()}
+          {/* Contest History */}
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: '22px 24px' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--text-primary)' }}>
+              Contest History
+            </h3>
+            {contest_history.length === 0 ? (
+              <div style={{ padding: '20px 0', textAlign: 'center' }}>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>🏅</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>No contests participated yet</div>
+              </div>
+            ) : (
+              <div style={{ maxHeight: 280, overflowY: 'auto', paddingRight: 4 }}>
+                {contest_history.map((c, i) => (
+                  <Link
+                    key={c.id}
+                    to={`/contests/${c.id}`}
+                    style={{
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                      padding: '12px 10px', marginBottom: 2,
+                      borderRadius: 8, textDecoration: 'none',
+                      transition: 'background 0.15s',
+                      borderBottom: i < contest_history.length - 1 ? '1px solid var(--border)' : 'none',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,212,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', marginBottom: 2 }}>
+                        {c.title}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                        {new Date(c.start_time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-green-600 font-bold">
-                      Solved: {c.solved_count}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                    <span style={{
+                      padding: '3px 10px',
+                      background: c.solved_count > 0 ? 'rgba(16,185,129,0.1)' : 'var(--surface-2)',
+                      border: `1px solid ${c.solved_count > 0 ? 'rgba(16,185,129,0.25)' : 'var(--border)'}`,
+                      borderRadius: 6,
+                      fontSize: 12, fontWeight: 700,
+                      fontFamily: 'var(--font-display)',
+                      color: c.solved_count > 0 ? 'var(--emerald)' : 'var(--text-muted)',
+                    }}>
+                      {c.solved_count} solved
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
