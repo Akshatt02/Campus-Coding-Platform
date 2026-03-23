@@ -349,6 +349,33 @@ export const removeProblemFromContestAdmin = async (token, contestId, problemId)
   return data;
 };
 
+export const submitCode = async (source_code, language_id, input) => {
+  const res = await fetch(`${BASE}/api/code/run`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source_code, language_id, input }),
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const getResult = async (token) => {
+  const res = await fetch(`${BASE}/api/code/result/${token}`);
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
+export const fetchTestcases = async (problemId, token) => {
+  const res = await fetch(`${BASE}/api/problems/${problemId}/testcases`, {
+    headers: { Authorization: token ? `Bearer ${token}` : '' }
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
 export const updateContestAdmin = async (token, contestId, payload) => {
   const res = await fetch(`${BASE}/api/admin/contests/${contestId}`, {
     method: 'PUT',
@@ -406,4 +433,7 @@ export default {
   downloadDepartmentBatchStats,
   updateContestAdmin,
   deleteContestAdmin,
+  submitCode,
+  getResult,
+  fetchTestcases,
 };

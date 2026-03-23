@@ -18,6 +18,7 @@ export default function FacultyContestCreate() {
     statement: '',
     difficulty: 'easy',
     tags: '',
+    testcases: [{ input: '', expected: '' }, { input: '', expected: '' }],
   });
   const [contestId, setContestId] = useState(null);
   const navigate = useNavigate();
@@ -37,6 +38,26 @@ export default function FacultyContestCreate() {
         {message.text}
       </div>
     );
+  };
+
+  const handleTestcaseChange = (index, field, value) => {
+    const newTestcases = [...problem.testcases];
+    newTestcases[index][field] = value;
+    setProblem({ ...problem, testcases: newTestcases });
+  };
+
+  const addTestcase = () => {
+    setProblem({
+      ...problem,
+      testcases: [...problem.testcases, { input: '', expected: '' }]
+    });
+  };
+
+  const removeTestcase = (index) => {
+    if (problem.testcases.length > 1) {
+      const newTestcases = problem.testcases.filter((_, i) => i !== index);
+      setProblem({ ...problem, testcases: newTestcases });
+    }
   };
 
   const handleContest = async (e) => {
@@ -84,6 +105,13 @@ export default function FacultyContestCreate() {
       return;
     }
 
+    // Validate testcases
+    const validTestcases = problem.testcases.filter(tc => tc.input.trim() && tc.expected.trim());
+    if (validTestcases.length === 0) {
+      setMessage({ text: 'Please provide at least one testcase.', type: 'error' });
+      return;
+    }
+
     try {
       const tags = problem.tags.split(',').map((t) => t.trim()).filter(Boolean);
       const probRes = await api.createProblem(token, {
@@ -91,13 +119,14 @@ export default function FacultyContestCreate() {
         statement: problem.statement,
         difficulty: problem.difficulty,
         tags,
+        testcases: validTestcases,
       });
       if (contestId) {
         await api.addProblemToContest(token, contestId, probRes.problemId);
       }
       setMessage({ text: 'Problem added successfully.', type: 'success' });
       // Clear form for the next problem
-      setProblem({ title: '', statement: '', difficulty: 'easy', tags: '' });
+      setProblem({ title: '', statement: '', difficulty: 'easy', tags: '', testcases: [{ input: '', expected: '' }, { input: '', expected: '' }] });
     } catch (err) {
       setMessage({ text: err.message || 'Error adding problem', type: 'error' });
     }
@@ -195,6 +224,43 @@ export default function FacultyContestCreate() {
               value={problem.tags}
               onChange={(e) => setProblem({ ...problem, tags: e.target.value })}
             />
+
+            {/* Test Cases */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium">Test Cases:</label>
+              {problem.testcases.map((testcase, index) => (
+                <div key={index} className="flex gap-2 items-center">
+                  <input
+                    className="form-input flex-1"
+                    placeholder="Input"
+                    value={testcase.input}
+                    onChange={(e) => handleTestcaseChange(index, 'input', e.target.value)}
+                  />
+                  <input
+                    className="form-input flex-1"
+                    placeholder="Expected Output"
+                    value={testcase.expected}
+                    onChange={(e) => handleTestcaseChange(index, 'expected', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeTestcase(index)}
+                    className="btn btn-ghost text-red-600 hover:text-red-800"
+                    disabled={problem.testcases.length <= 1}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addTestcase}
+                className="btn btn-ghost text-blue-600 hover:text-blue-800"
+              >
+                + Add Test Case
+              </button>
+            </div>
+
             <button className="btn btn-primary" type="submit">
               Add Problem
             </button>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../context/AuthContext';
+import CodeEditor from '../components/CodeEditor';
 
 const VERDICTS = ['AC', 'WA', 'TLE', 'RE', 'CE'];
 
@@ -26,9 +27,6 @@ export default function ProblemDetail() {
   const { state } = useLocation();
   const { token } = useContext(AuthContext);
   const [problem, setProblem] = useState(state?.problem || null);
-  const [verdict, setVerdict] = useState('AC');
-  const [ok, setOk] = useState(null);
-  const [err, setErr] = useState(null);
   const [isLoading, setIsLoading] = useState(!state?.problem); // Add loading state
 
   useEffect(() => {
@@ -46,26 +44,13 @@ export default function ProblemDetail() {
         setProblem(found || null);
       } catch (e) {
         console.error(e);
-        setErr('Failed to load problem.'); // Set an error for the user
+        // Remove error handling for now
       } finally {
         setIsLoading(false);
       }
     };
     load();
   }, [id, problem, token]);
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setOk(null);
-    setErr(null);
-    if (!problem) return setErr('No problem loaded');
-    try {
-      await api.createSubmission(token, { problem_id: problem.id, verdict });
-      setOk('Submission saved successfully!');
-    } catch (e) {
-      setErr(e?.message || JSON.stringify(e));
-    }
-  };
 
   // Styled loading state
   if (isLoading) {
@@ -110,37 +95,8 @@ export default function ProblemDetail() {
         />
       </div>
 
-      {/* Submission Card */}
-      <div className="card p-6">
-        <h3 className="text-xl font-semibold mb-3">Submit (Simulated)</h3>
-        
-        {/* Success/Error Messages */}
-        {ok && (
-          <div className="mb-4 p-3 rounded-md bg-green-100 text-green-700 text-sm">
-            {ok}
-          </div>
-        )}
-        {err && (
-          <div className="mb-4 p-3 rounded-md bg-red-100 text-red-700 text-sm">
-            {err}
-          </div>
-        )}
-
-        <form onSubmit={submit} className="flex flex-col sm:flex-row items-center gap-3">
-          <select
-            value={verdict}
-            onChange={(e) => setVerdict(e.target.value)}
-            className="form-select w-full sm:w-auto flex-1"
-          >
-            {VERDICTS.map((v) => (
-              <option key={v} value={v} className="form-option">
-                {v}
-              </option>
-            ))}
-          </select>
-          <button className="btn btn-primary w-full sm:w-auto">Submit</button>
-        </form>
-      </div>
+      {/* Code Editor */}
+      <CodeEditor problemId={problem.id} />
     </div>
   );
 }

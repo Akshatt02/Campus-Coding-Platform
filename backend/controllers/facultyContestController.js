@@ -27,7 +27,7 @@ export const createContest = async (req, res) => {
 
 export const createProblemWithTags = async (req, res) => {
   try {
-    const { title, statement, difficulty, tags } = req.body;
+    const { title, statement, difficulty, tags, testcases } = req.body;
     const facultyId = req.user.id;
 
     const [problemResult] = await pool.query(
@@ -49,6 +49,15 @@ export const createProblemWithTags = async (req, res) => {
         }
 
         await pool.query('INSERT INTO problem_tags (problem_id, tag_id) VALUES (?, ?)', [problemId, tagId]);
+      }
+    }
+
+    if (Array.isArray(testcases) && testcases.length > 0) {
+      for (const testcase of testcases) {
+        await pool.query(
+          `INSERT INTO testcases (problem_id, input, expected_output) VALUES (?, ?, ?)`,
+          [problemId, testcase.input, testcase.expected]
+        );
       }
     }
 

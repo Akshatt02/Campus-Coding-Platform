@@ -71,3 +71,17 @@ export const getProblems = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+export const getTestcases = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query(
+            'SELECT input, expected_output AS expected FROM testcases WHERE problem_id = ?',
+            [id]
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

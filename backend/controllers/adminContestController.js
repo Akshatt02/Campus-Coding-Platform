@@ -40,7 +40,7 @@ export const addProblemToContestAdmin = async (req, res) => {
 /** Create a new problem with tags (admin) */
 export const createProblemWithTagsAdmin = async (req, res) => {
   try {
-    const { title, statement, difficulty, tags } = req.body;
+    const { title, statement, difficulty, tags, testcases } = req.body;
     const adminId = req.user.id;
 
     const [problemResult] = await pool.query(
@@ -62,6 +62,15 @@ export const createProblemWithTagsAdmin = async (req, res) => {
         }
 
         await pool.query('INSERT INTO problem_tags (problem_id, tag_id) VALUES (?, ?)', [problemId, tagId]);
+      }
+    }
+
+    if (Array.isArray(testcases) && testcases.length > 0) {
+      for (const testcase of testcases) {
+        await pool.query(
+          `INSERT INTO testcases (problem_id, input, expected_output) VALUES (?, ?, ?)`,
+          [problemId, testcase.input, testcase.expected]
+        );
       }
     }
 
