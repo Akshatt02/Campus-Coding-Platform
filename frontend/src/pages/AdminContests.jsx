@@ -55,12 +55,12 @@ export default function AdminContests() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">All Contests (Admin)</h1>
+      <h1 className="text-3xl font-bold">My Created Contests</h1>
 
       {contests.length === 0 ? (
         // Styled empty state
         <div className="card p-8 text-center muted">
-          No contests found in the system.
+          No contests created yet.
         </div>
       ) : (
         <div className="space-y-4">

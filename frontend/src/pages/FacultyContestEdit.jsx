@@ -49,6 +49,7 @@ export default function FacultyContestEdit() {
     statement: '',
     difficulty: 'easy',
     tags: '',
+    testcases: [{ input: '', expected: '' }, { input: '', expected: '' }],
   });
 
   // Modal state
@@ -137,6 +138,26 @@ export default function FacultyContestEdit() {
     );
   };
 
+  const handleTestcaseChange = (index, field, value) => {
+    const newTestcases = [...problemForm.testcases];
+    newTestcases[index][field] = value;
+    setProblemForm({ ...problemForm, testcases: newTestcases });
+  };
+
+  const addTestcase = () => {
+    setProblemForm({
+      ...problemForm,
+      testcases: [...problemForm.testcases, { input: '', expected: '' }]
+    });
+  };
+
+  const removeTestcase = (index) => {
+    if (problemForm.testcases.length > 1) {
+      const newTestcases = problemForm.testcases.filter((_, i) => i !== index);
+      setProblemForm({ ...problemForm, testcases: newTestcases });
+    }
+  };
+
   const handleRemoveProblem = (pId) => {
     showConfirmModal(
       'Remove this problem from the contest?',
@@ -159,6 +180,19 @@ export default function FacultyContestEdit() {
   const handleAddProblem = async (e) => {
     e.preventDefault();
     setMessage({ text: '', type: '' });
+
+    if (!problemForm.title || !problemForm.statement || !problemForm.tags) {
+      setMessage({ text: 'Please fill all problem fields.', type: 'error' });
+      return;
+    }
+
+    // Validate testcases
+    const validTestcases = problemForm.testcases.filter(tc => tc.input.trim() && tc.expected.trim());
+    if (validTestcases.length === 0) {
+      setMessage({ text: 'Please provide at least one testcase.', type: 'error' });
+      return;
+    }
+
     try {
       const tags = problemForm.tags.split(',').map((t) => t.trim()).filter(Boolean);
       const probRes = await api.createProblem(token, {
@@ -166,13 +200,14 @@ export default function FacultyContestEdit() {
         statement: problemForm.statement,
         difficulty: problemForm.difficulty,
         tags,
+        testcases: validTestcases,
       });
       await api.addProblemToContest(token, id, probRes.problemId);
       
       // Reload problems to get the newly added one
       const refreshed = await api.fetchContestById(id, token);
       setProblems(refreshed.problems || []);
-      setProblemForm({ title: '', statement: '', difficulty: 'easy', tags: '' });
+      setProblemForm({ title: '', statement: '', difficulty: 'easy', tags: '', testcases: [{ input: '', expected: '' }, { input: '', expected: '' }] });
       setMessage({ text: 'Problem added to contest', type: 'success' });
     } catch (err) {
       console.error(err);
@@ -365,6 +400,48 @@ export default function FacultyContestEdit() {
                 }
                 required
               />
+
+              {/* Test Cases */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Test Cases:</label>
+                {problemForm.testcases.map((testcase, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <input
+                      className="form-input flex-1"
+                      placeholder="Input"
+                      value={testcase.input}
+                      onChange={(e) => handleTestcaseChange(index, 'input', e.target.value)}
+                    />
+                    <input
+                      className="form-input flex-1"
+                      placeholder="Expected Output"
+                      value={testcase.expected}
+                      onChange={(e) => handleTestcaseChange(index, 'expected', e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeTestcase(index)}
+                      className="btn btn-ghost !p-2 text-[var(--red)] hover:bg-[rgba(239,68,68,0.1)]"
+                      disabled={problemForm.testcases.length <= 1}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addTestcase}
+                  className="btn btn-secondary w-full text-xs py-2"
+                >
+                  <svg className="w-3.5 h-3.5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Test Case
+                </button>
+              </div>
+
               <button className="btn btn-primary">Create & Add</button>
             </form>
           </div>
