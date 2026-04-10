@@ -68,13 +68,13 @@ export default function Register() {
       <div style={{
         position: 'fixed', top: '-30%', left: '-10%',
         width: 500, height: 500,
-        background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 65%)',
+        background: 'radial-gradient(circle, rgba(21,128,61,0.08) 0%, transparent 65%)',
         pointerEvents: 'none',
       }} />
       <div style={{
         position: 'fixed', bottom: '-20%', right: '-5%',
         width: 400, height: 400,
-        background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 65%)',
+        background: 'radial-gradient(circle, rgba(161,98,7,0.12) 0%, transparent 65%)',
         pointerEvents: 'none',
       }} />
 
@@ -87,9 +87,9 @@ export default function Register() {
               width: 52, height: 52,
               background: 'linear-gradient(135deg, var(--cyan), var(--emerald))',
               borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 24, fontWeight: 800, color: '#080c14',
+              fontSize: 24, fontWeight: 800, color: 'var(--on-accent)',
               margin: '0 auto', fontFamily: 'var(--font-display)',
-              boxShadow: '0 0 30px rgba(0,212,255,0.3)',
+              boxShadow: '0 8px 20px rgba(161,98,7,0.2)',
             }}>C</div>
           </Link>
           <h1 style={{
@@ -115,10 +115,10 @@ export default function Register() {
                     background: i <= step ? 'var(--cyan)' : 'var(--surface-2)',
                     border: `2px solid ${i <= step ? 'var(--cyan)' : 'var(--border)'}`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700, color: i <= step ? '#080c14' : 'var(--text-muted)',
+                    fontSize: 12, fontWeight: 700, color: i <= step ? 'var(--on-accent)' : 'var(--text-muted)',
                     fontFamily: 'var(--font-display)',
                     transition: 'all 0.3s',
-                    boxShadow: i <= step ? '0 0 12px rgba(0,212,255,0.4)' : 'none',
+                    boxShadow: i <= step ? '0 4px 12px rgba(161,98,7,0.3)' : 'none',
                   }}>
                     {i < step ? '✓' : i + 1}
                   </div>
@@ -146,20 +146,13 @@ export default function Register() {
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border)',
-            borderRadius: 16,
+            borderRadius: 14,
             padding: 32,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 10px 30px rgba(28,25,23,0.08)',
           }}
         >
           {error && (
-            <div style={{
-              padding: '10px 14px',
-              background: 'rgba(239,68,68,0.1)',
-              border: '1px solid rgba(239,68,68,0.25)',
-              borderRadius: 8, marginBottom: 20,
-              color: '#f87171', fontSize: 13,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
+            <div className="ui-alert-error" style={{ marginBottom: 20, fontSize: 13 }}>
               <span>⚠</span> {error}
             </div>
           )}
@@ -195,11 +188,11 @@ export default function Register() {
                       <div style={{
                         height: '100%',
                         width: `${Math.min(100, (form.password.length / 10) * 100)}%`,
-                        background: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#10b981',
+                        background: form.password.length < 6 ? 'var(--red)' : form.password.length < 10 ? 'var(--amber)' : 'var(--emerald)',
                         borderRadius: 2, transition: 'width 0.3s, background 0.3s',
                       }} />
                     </div>
-                    <span style={{ fontSize: 11, color: form.password.length < 6 ? '#f87171' : form.password.length < 10 ? '#f59e0b' : '#10b981', marginTop: 3, display: 'block' }}>
+                    <span style={{ fontSize: 11, color: form.password.length < 6 ? 'var(--red)' : form.password.length < 10 ? 'var(--amber)' : 'var(--emerald)', marginTop: 3, display: 'block' }}>
                       {form.password.length < 6 ? 'Too short' : form.password.length < 10 ? 'Good' : 'Strong'}
                     </span>
                   </div>

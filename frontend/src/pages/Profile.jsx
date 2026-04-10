@@ -82,8 +82,8 @@ function TagRow({ name, attempted, solved }) {
 
 function getRatingColor(rating) {
   if (!rating) return 'var(--text-muted)';
-  if (rating >= 2100) return '#f59e0b';
-  if (rating >= 1900) return '#a78bfa';
+  if (rating >= 2100) return 'var(--amber)';
+  if (rating >= 1900) return 'var(--violet)';
   if (rating >= 1700) return 'var(--cyan)';
   if (rating >= 1500) return 'var(--emerald)';
   return 'var(--text-secondary)';
@@ -121,7 +121,7 @@ export default function Profile() {
 
   if (error) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ padding: '20px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#f87171', fontSize: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div className="ui-alert-error" style={{ padding: '20px 24px', gap: 10 }}>
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
@@ -133,10 +133,9 @@ export default function Profile() {
   if (!profile) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--text-muted)' }}>
-        <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <div style={{ width: 32, height: 32 }} className="ui-spinner" />
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Loading profile...</span>
       </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 
@@ -162,10 +161,11 @@ export default function Profile() {
 
           <div className="flex items-start gap-10 flex-wrap lg:flex-nowrap relative z-1">
             {/* Avatar */}
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-extrabold text-[#080c14] shadow-2xl flex-shrink-0"
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-extrabold shadow-2xl flex-shrink-0"
                  style={{
                    background: `linear-gradient(135deg, ${ratingColor}, ${ratingColor}88)`,
                    boxShadow: `0 12px 40px ${ratingColor}33`,
+                   color: 'var(--on-accent)',
                  }}>
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
@@ -241,8 +241,8 @@ export default function Profile() {
               Difficulty Breakdown
             </h3>
             <DifficultyBar label="Easy" {...getDiff('easy')} color="var(--emerald)" />
-            <DifficultyBar label="Medium" {...getDiff('medium')} color="#f59e0b" />
-            <DifficultyBar label="Hard" {...getDiff('hard')} color="#ef4444" />
+            <DifficultyBar label="Medium" {...getDiff('medium')} color="var(--amber)" />
+            <DifficultyBar label="Hard" {...getDiff('hard')} color="var(--red)" />
           </div>
 
           {/* Weak Topics */}

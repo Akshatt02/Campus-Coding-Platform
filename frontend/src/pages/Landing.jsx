@@ -12,7 +12,7 @@ const FEATURES = [
     title: 'Real-time Contests',
     desc: 'Compete in live coding contests with instant leaderboard updates and penalty scoring.',
     color: 'var(--cyan)',
-    glow: 'rgba(0,212,255,0.15)',
+    glow: 'rgba(161,98,7,0.18)',
   },
   {
     icon: (
@@ -33,8 +33,8 @@ const FEATURES = [
     ),
     title: 'Rating System',
     desc: 'Earn and grow your competitive rating. Every contest changes your standing.',
-    color: '#f59e0b',
-    glow: 'rgba(245,158,11,0.15)',
+    color: 'var(--amber)',
+    glow: 'rgba(180,83,9,0.18)',
   },
   {
     icon: (
@@ -44,16 +44,16 @@ const FEATURES = [
     ),
     title: 'Problem Archive',
     desc: 'Filter by difficulty, tags, and acceptance rate. Practice at your own pace.',
-    color: '#a78bfa',
-    glow: 'rgba(124,58,237,0.15)',
+    color: 'var(--violet)',
+    glow: 'rgba(109,40,217,0.16)',
   },
 ];
 
 const STATS = [
   { value: '500+', label: 'Problems', color: 'var(--cyan)' },
   { value: '50+', label: 'Contests', color: 'var(--emerald)' },
-  { value: '1000+', label: 'Students', color: '#a78bfa' },
-  { value: '95%', label: 'Uptime', color: '#f59e0b' },
+  { value: '1000+', label: 'Students', color: 'var(--violet)' },
+  { value: '95%', label: 'Uptime', color: 'var(--amber)' },
 ];
 
 function AnimatedCounter({ target }) {
@@ -98,7 +98,7 @@ export default function Landing() {
       <div style={{
         position: 'fixed', top: '-20%', right: '-10%',
         width: 600, height: 600,
-        background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(161,98,7,0.1) 0%, transparent 70%)',
         pointerEvents: 'none', zIndex: 0,
       }} />
       <div style={{
@@ -117,7 +117,7 @@ export default function Landing() {
             display: 'inline-flex', alignItems: 'center', gap: 6,
             padding: '6px 14px',
             background: 'var(--cyan-dim)',
-            border: '1px solid rgba(0,212,255,0.25)',
+            border: '1px solid var(--border-accent)',
             borderRadius: 999,
             marginBottom: 32,
             fontSize: 12, fontWeight: 700,
@@ -205,7 +205,7 @@ export default function Landing() {
             border: '1px solid var(--border)',
             borderRadius: 16,
             overflow: 'hidden',
-            boxShadow: '0 0 60px rgba(0,212,255,0.08), 0 20px 60px rgba(0,0,0,0.5)',
+            boxShadow: '0 12px 36px rgba(28,25,23,0.1)',
           }}>
             {/* Terminal top bar */}
             <div style={{
@@ -237,7 +237,7 @@ export default function Landing() {
                   transition: 'background 0.15s',
                   cursor: 'default',
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,212,255,0.03)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(161,98,7,0.06)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
                   <span style={{

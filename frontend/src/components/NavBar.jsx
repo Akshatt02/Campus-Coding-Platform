@@ -68,12 +68,10 @@ export default function NavBar() {
     <header
       style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: scrolled
-          ? 'rgba(8,12,20,0.95)'
-          : 'rgba(8,12,20,0.8)',
+        background: scrolled ? 'var(--nav-bg-scrolled)' : 'var(--nav-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: `1px solid ${scrolled ? 'rgba(255,255,255,0.07)' : 'transparent'}`,
+        borderBottom: `1px solid ${scrolled ? 'var(--nav-border)' : 'transparent'}`,
         transition: 'all 0.3s ease',
       }}
     >
@@ -104,8 +102,8 @@ export default function NavBar() {
               background: 'linear-gradient(135deg, var(--cyan), var(--emerald))',
               borderRadius: 7,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, color: '#080c14',
-              boxShadow: '0 0 16px rgba(0,212,255,0.4)',
+              fontSize: 14, fontWeight: 800, color: 'var(--on-accent)',
+              boxShadow: '0 2px 8px rgba(161, 98, 7, 0.2)',
               flexShrink: 0,
             }}
           >
@@ -158,7 +156,7 @@ export default function NavBar() {
                     background: 'linear-gradient(135deg, var(--cyan), var(--emerald))',
                     borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 700, color: '#080c14',
+                    fontSize: 11, fontWeight: 700, color: 'var(--on-accent)',
                     fontFamily: 'var(--font-display)',
                     flexShrink: 0,
                   }}
@@ -196,7 +194,7 @@ export default function NavBar() {
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.color = '#f87171';
+                  e.currentTarget.style.color = 'var(--red)';
                   e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)';
                   e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
                 }}

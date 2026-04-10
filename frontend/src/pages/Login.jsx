@@ -60,7 +60,7 @@ export default function Login() {
         {/* Decorative grid */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(161,98,7,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(161,98,7,0.05) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
           pointerEvents: 'none',
         }} />
@@ -70,7 +70,7 @@ export default function Login() {
           top: '50%', left: '50%',
           transform: 'translate(-50%,-50%)',
           width: 500, height: 500,
-          background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(161,98,7,0.14) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
@@ -81,9 +81,9 @@ export default function Login() {
             background: 'linear-gradient(135deg, var(--cyan), var(--emerald))',
             borderRadius: 20,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 38, fontWeight: 800, color: '#080c14',
+            fontSize: 38, fontWeight: 800, color: 'var(--on-accent)',
             margin: '0 auto 32px',
-            boxShadow: '0 0 40px rgba(0,212,255,0.4)',
+            boxShadow: '0 8px 24px rgba(161,98,7,0.25)',
             fontFamily: 'var(--font-display)',
           }}>
             C
@@ -146,14 +146,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div style={{
-              padding: '12px 16px',
-              background: 'rgba(239,68,68,0.1)',
-              border: '1px solid rgba(239,68,68,0.25)',
-              borderRadius: 10, marginBottom: 20,
-              color: '#f87171', fontSize: 14,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
+            <div className="ui-alert-error" style={{ marginBottom: 20 }}>
               <span>⚠</span> {error}
             </div>
           )}
@@ -245,8 +238,8 @@ export default function Login() {
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{
                     width: 14, height: 14, borderRadius: '50%',
-                    border: '2px solid rgba(8,12,20,0.3)',
-                    borderTopColor: '#080c14',
+                    border: '2px solid rgba(161,98,7,0.25)',
+                    borderTopColor: 'var(--cyan)',
                     animation: 'spin 0.7s linear infinite',
                     display: 'inline-block',
                   }} />
@@ -270,7 +263,6 @@ export default function Login() {
         </div>
       </div>
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

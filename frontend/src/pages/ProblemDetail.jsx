@@ -90,7 +90,7 @@ export default function ProblemDetail() {
 
         {/* Styled problem statement box */}
         <div
-          className="mt-4 p-4 bg-sky-50 border border-sky-100 rounded-lg prose max-w-none"
+          className="problem-statement mt-4 p-4 max-w-none"
           dangerouslySetInnerHTML={{ __html: problem.statement }}
         />
       </div>
