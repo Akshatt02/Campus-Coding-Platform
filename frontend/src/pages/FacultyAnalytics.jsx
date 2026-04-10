@@ -91,6 +91,8 @@ export default function FacultyAnalytics() {
 		</div>
 	);
 
+	console.log(user);
+
 	const batches = Array.from(new Set(students.map((s) => s.batch))).sort();
 	const avgRating = students.length > 0 ? students.reduce((a, b) => a + b.rating, 0) / students.length : 0;
 	const deptName = user?.department_name || 'Department';

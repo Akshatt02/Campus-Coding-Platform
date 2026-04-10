@@ -25,6 +25,13 @@ export const register = async (req, res) => {
         );
 
         const userId = result.insertId;
+
+        let department_name = null;
+        if (department_id) {
+            const [dept] = await pool.query('SELECT name FROM departments WHERE id = ?', [department_id]);
+            department_name = dept[0]?.name || null;
+        }
+
         const token = jwt.sign(
             { id: userId, role, email, department_id },
             JWT_SECRET,
@@ -39,6 +46,7 @@ export const register = async (req, res) => {
                 email,
                 role,
                 department_id,
+                department_name,
                 batch,
                 rating,
             },
@@ -56,7 +64,7 @@ export const login = async (req, res) => {
         if (!email || !password)
             return res.status(400).json({ message: 'Missing fields' });
 
-        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        const [rows] = await pool.query('SELECT u.*, d.name as department_name FROM users u LEFT JOIN departments d ON u.department_id = d.id WHERE u.email = ?', [email]);
         if (!rows.length)
             return res.status(400).json({ message: 'Invalid credentials' });
 
@@ -81,6 +89,7 @@ export const login = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 department_id: user.department_id,
+                department_name: user.department_name,
                 rating: user.rating,
             },
         });
