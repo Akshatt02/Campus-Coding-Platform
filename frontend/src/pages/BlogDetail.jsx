@@ -142,7 +142,7 @@ export default function BlogDetail() {
         </h1>
         <div className="flex items-center justify-between pb-8 border-b border-[var(--border)]">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--emerald)] flex items-center justify-center font-bold text-[#080c14]">
+             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--emerald)] flex items-center justify-center font-bold text-[var(--on-accent)]">
                  {blog.author_name?.charAt(0).toUpperCase()}
              </div>
              <div>

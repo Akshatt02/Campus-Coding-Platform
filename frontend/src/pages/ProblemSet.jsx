@@ -116,7 +116,7 @@ export default function ProblemSet() {
       {/* Loading State */}
       {loading && (
         <div className="card p-12 text-center">
-             <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+             <div className="ui-spinner ui-spinner-lg mx-auto mb-3" />
              <div className="muted">Loading problems...</div>
         </div>
       )}
@@ -181,7 +181,6 @@ export default function ProblemSet() {
           ))}
         </div>
       )}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

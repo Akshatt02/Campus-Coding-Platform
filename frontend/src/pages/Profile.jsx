@@ -133,7 +133,7 @@ export default function Profile() {
   if (!profile) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: 'var(--text-muted)' }}>
-        <div style={{ width: 32, height: 32 }} className="ui-spinner" />
+        <div className="ui-spinner ui-spinner-lg" />
         <span style={{ fontFamily: 'var(--font-display)', fontSize: 14 }}>Loading profile...</span>
       </div>
     </div>
@@ -275,9 +275,9 @@ export default function Profile() {
                     </span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 60, height: 3, background: 'var(--bg-2)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${t.wrong_percent}%`, background: '#ef4444', borderRadius: 2 }} />
+                        <div style={{ height: '100%', width: `${t.wrong_percent}%`, background: 'var(--red)', borderRadius: 2 }} />
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 12, color: '#f87171', minWidth: 40, textAlign: 'right' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 12, color: 'var(--red)', minWidth: 40, textAlign: 'right' }}>
                         {t.wrong_percent}%
                       </span>
                     </div>
@@ -328,7 +328,7 @@ export default function Profile() {
                       transition: 'background 0.15s',
                       borderBottom: i < contest_history.length - 1 ? '1px solid var(--border)' : 'none',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,212,255,0.04)'}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(161,98,7,0.06)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                   >
                     <div>
@@ -357,7 +357,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   );
 }

@@ -187,7 +187,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            className="form-select text-sm !py-1.5 !pr-10 !bg-[var(--surface-2)]"
+            className="form-select text-sm !py-1.5 !pr-10 !bg-[var(--surface)]"
           >
             {Object.entries(LANGUAGES).map(([key, lang]) => (
               <option key={key} value={key}>
@@ -198,8 +198,8 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
         </div>
       </div>
 
-      {/* Monaco Editor */}
-      <div className="border border-[var(--border)] rounded-xl overflow-hidden shadow-2xl">
+      {/* Monaco Editor — dark theme on light card (LeetCode-style) */}
+      <div className="editor-shell">
         <Editor
           height="450px"
           language={language}
@@ -209,6 +209,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
           options={{
             minimap: { enabled: false },
             fontSize: 14,
+            fontFamily: 'var(--font-mono), Consolas, monospace',
             lineNumbers: 'on',
             roundedSelection: false,
             scrollBeyondLastLine: false,
@@ -236,7 +237,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
             className="btn btn-primary px-8"
           >
             {isLoading ? (
-              <div className="w-4 h-4 border-2 border-[var(--bg)] border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[var(--on-accent)] border-t-transparent rounded-full animate-spin" />
             ) : 'Submit'}
           </button>
         </div>
@@ -268,7 +269,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
 
       {/* Tabs System */}
       <div className="space-y-4">
-        <div className="flex gap-1 p-1 bg-[var(--surface-2)] rounded-lg w-fit">
+        <div className="code-io-tabs">
           {[
             { id: 'input', label: 'Custom Input' },
             { id: 'output', label: 'Terminal Output' },
@@ -276,12 +277,9 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
           ].map(tab => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-md text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === tab.id 
-                  ? 'bg-[var(--surface-3)] text-[var(--cyan)] shadow-sm' 
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-3)]/50'
-              }`}
+              className={`code-io-tab ${activeTab === tab.id ? 'code-io-tab-active' : ''}`}
             >
               {tab.label}
             </button>
@@ -294,7 +292,7 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                className="w-full h-32 p-4 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] focus:border-[var(--cyan)] transition-colors outline-none"
+                className="w-full h-32 p-4 bg-[var(--surface)] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] focus:border-[var(--cyan)] focus:ring-2 focus:ring-[var(--cyan-dim)] transition-colors outline-none"
                 placeholder="Enter custom input for 'Run Code'..."
               />
             </div>
@@ -302,16 +300,20 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
 
           {activeTab === 'output' && (
             <div className="space-y-3">
-              <pre className="w-full h-32 p-4 bg-[#0d1321] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] overflow-auto scroll-smooth">
-                {output || 'No output to show. Run your code to see results.'}
+              <pre className="editor-output h-32 scroll-smooth">
+                {output || (
+                  <span style={{ color: 'var(--editor-terminal-muted)' }}>
+                    No output to show. Run your code to see results.
+                  </span>
+                )}
               </pre>
             </div>
           )}
 
           {activeTab === 'tests' && (
-            <div className="space-y-4 h-64 overflow-auto pr-2 custom-scrollbar">
+            <div className="space-y-4 max-h-64 overflow-auto pr-1">
               {testResults.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl muted italic">
+                <div className="h-full min-h-[10rem] flex flex-col items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl bg-[var(--surface-2)]/50 muted italic text-sm px-4 text-center">
                   Run 'Submit' to see test case results
                 </div>
               ) : (
@@ -319,13 +321,13 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
                   {testResults.map((result, index) => (
                     <div key={index} className={`p-4 border rounded-xl transition-all ${
                       result.passed 
-                        ? 'bg-[rgba(16,185,129,0.03)] border-[rgba(16,185,129,0.2)]' 
-                        : 'bg-[rgba(239,68,68,0.03)] border-[rgba(239,68,68,0.2)]'
+                        ? 'bg-[var(--emerald-dim)] border-[rgba(21,128,61,0.22)]' 
+                        : 'bg-[rgba(220,38,38,0.06)] border-[rgba(220,38,38,0.2)]'
                     }`}>
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            result.passed ? 'bg-[var(--emerald)] text-[var(--bg)]' : 'bg-[var(--red)] text-white'
+                            result.passed ? 'bg-[var(--emerald)] text-[var(--on-accent)]' : 'bg-[var(--red)] text-[var(--on-accent)]'
                           }`}>
                             {result.index}
                           </span>
@@ -349,13 +351,13 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
                         </div>
                         <div className="col-span-2 space-y-1">
                           <div className="muted text-[9px] uppercase">Actual Output</div>
-                          <div className={`p-2 rounded border ${result.passed ? 'bg-[var(--bg-2)] border-[var(--border)]' : 'bg-[rgba(239,68,68,0.1)] border-[rgba(239,68,68,0.2)] text-[var(--red)]'}`}>
+                          <div className={`p-2 rounded border ${result.passed ? 'bg-[var(--bg-2)] border-[var(--border)] text-[var(--text-primary)]' : 'bg-[rgba(220,38,38,0.08)] border-[rgba(220,38,38,0.22)] text-[var(--red)]'}`}>
                             {result.actual || 'No output'}
                           </div>
                         </div>
                       </div>
                       {result.error && (
-                        <div className="mt-3 p-2 bg-[rgba(239,68,68,0.1)] rounded border border-[rgba(239,68,68,0.2)] text-[10px] text-[var(--red)] font-mono">
+                        <div className="mt-3 p-2 bg-[rgba(220,38,38,0.08)] rounded border border-[rgba(220,38,38,0.2)] text-[10px] text-[var(--red)] font-mono">
                           <strong>Error:</strong> {result.error}
                         </div>
                       )}

@@ -45,6 +45,11 @@
   --statement-text: #292524;
   --statement-code-bg: #f5f5f4;
   --statement-code-fg: #1c1917;
+
+  /* Monaco sits on dark chrome; terminal/output matches readable console */
+  --editor-terminal-bg: #1c1917;
+  --editor-terminal-fg: #e7e5e4;
+  --editor-terminal-muted: #a8a29e;
 }
 
 *,
@@ -356,6 +361,72 @@ textarea.form-input {
   border-top-color: var(--cyan);
   animation: spin 0.75s linear infinite;
   display: inline-block;
+}
+
+.ui-spinner-lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+.editor-shell {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(28, 25, 23, 0.07);
+}
+
+.editor-output {
+  min-height: 8rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: var(--editor-terminal-bg);
+  color: var(--editor-terminal-fg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-io-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  width: fit-content;
+}
+
+.code-io-tab {
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.code-io-tab:hover {
+  color: var(--text-primary);
+  background: rgba(254, 243, 199, 0.6);
+}
+
+.code-io-tab-active {
+  background: var(--surface);
+  color: var(--cyan);
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06);
 }
 
 .problem-statement {

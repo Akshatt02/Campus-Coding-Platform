@@ -64,7 +64,7 @@ export default function BlogList() {
                   </h2>
                   <div className="flex items-center gap-4 text-sm text-[var(--text-muted)]">
                     <span className="flex items-center gap-1">
-                      <div className="w-5 h-5 rounded-full bg-[var(--cyan)] text-[#080c14] flex items-center justify-center text-[10px] font-bold">
+                      <div className="w-5 h-5 rounded-full bg-[var(--cyan)] text-[var(--on-accent)] flex items-center justify-center text-[10px] font-bold">
                         {blog.author_name?.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-[var(--text-secondary)] font-medium">{blog.author_name}</span>

@@ -29,7 +29,7 @@ export default function ContestLeaderboard({ contest, token }) {
 
       {loading && (
           <div className="p-12 text-center">
-            <div style={{ width: 32, height: 32, margin: '0 auto 12px', border: '3px solid var(--border)', borderTopColor: 'var(--cyan)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div className="ui-spinner ui-spinner-lg mx-auto mb-3" />
             <div className="muted">Loading leaderboard...</div>
           </div>
       )}
@@ -57,10 +57,10 @@ export default function ContestLeaderboard({ contest, token }) {
               {rows.map((r) => (
                 <tr key={r.user_id} className={r.rank <= 3 ? 'bg-[var(--surface-2)]/50' : ''}>
                   <td className="text-center">
-                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg font-extrabold font-display ${
-                        r.rank === 1 ? 'bg-[var(--amber)] text-[#080c14] shadow-[0_0_12px_var(--amber)]' : 
-                        r.rank === 2 ? 'bg-slate-400 text-[#080c14]' :
-                        r.rank === 3 ? 'bg-orange-700 text-[#f0f4ff]' : 'text-[var(--text-muted)]'
+                    <span className={`inline-flex items-center justify-center w-7 h-7 rounded-lg font-extrabold ${
+                        r.rank === 1 ? 'bg-[var(--amber)] text-[var(--on-accent)] shadow-sm' :
+                        r.rank === 2 ? 'bg-stone-300 text-stone-900' :
+                        r.rank === 3 ? 'bg-amber-800 text-[var(--on-accent)]' : 'text-[var(--text-muted)]'
                     }`}>
                         {r.rank}
                     </span>
@@ -88,7 +88,6 @@ export default function ContestLeaderboard({ contest, token }) {
           </table>
         </div>
       )}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
