@@ -34,6 +34,12 @@ export default function ContestDetail() {
   
   // Added message state to replace alerts
   const [message, setMessage] = useState({ text: '', type: '' });
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const loadContest = async () => {
@@ -120,7 +126,6 @@ export default function ContestDetail() {
     );
   }
 
-  const now = new Date();
   const start = new Date(contest.start_time);
   const end = new Date(contest.end_time);
 
@@ -132,16 +137,56 @@ export default function ContestDetail() {
   const canManageRatings =
     user && (user.role === 'admin' || user.id === contest.created_by);
 
+  // Timer logic
+  const diff = Math.max(0, end - now);
+  const totalDuration = end - start;
+  const percentLeft = (diff / totalDuration) * 100;
+  
+  const h = Math.floor(diff / (1000 * 60 * 60));
+  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+  const getTimerColor = () => {
+    if (diff < 1000 * 60 * 5) return 'text-[var(--red)]'; // < 5 mins
+    if (percentLeft < 25) return 'text-[var(--amber)]'; // < 25%
+    return 'text-[var(--emerald)]';
+  };
+
+  const getTimerGlow = () => {
+    if (diff < 1000 * 60 * 5) return 'shadow-[0_0_15px_rgba(220,38,38,0.3)] animate-pulse';
+    return '';
+  };
+
   return (
     <div className="space-y-6">
       {/* Contest header */}
       <div className="card p-6">
-        <h1 className="text-3xl font-bold">{contest.title}</h1>
-        <div className="text-lg muted">
-          {contest.department_name
-            ? `${contest.department_name} Department`
-            : 'College-wide'}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl font-bold">{contest.title}</h1>
+            <div className="text-lg muted">
+              {contest.department_name
+                ? `${contest.department_name} Department`
+                : 'College-wide'}
+            </div>
+          </div>
+
+          {isOngoing && (
+            <div className={`glass px-5 py-3 flex flex-col items-center min-w-[140px] border-accent ${getTimerGlow()}`}>
+              <span className="text-[10px] font-bold uppercase tracking-wider muted mb-1">Time Remaining</span>
+              <div className={`text-2xl font-mono font-bold flex items-center gap-1 ${getTimerColor()}`}>
+                <span>{String(h).padStart(2, '0')}</span>
+                <span className="opacity-50">:</span>
+                <span>{String(m).padStart(2, '0')}</span>
+                <span className="opacity-50">:</span>
+                <span className={diff < 1000 * 60 ? 'animate-pulse' : ''}>
+                  {String(s).padStart(2, '0')}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+
         <div className="mt-2 text-[var(--text-secondary)] flex items-center gap-2">
           {formatDateTime(contest.start_time)}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
