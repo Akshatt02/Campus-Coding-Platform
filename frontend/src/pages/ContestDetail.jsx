@@ -25,7 +25,7 @@ export default function ContestDetail() {
   const { token, user } = useContext(AuthContext);
 
   const [contest, setContest] = useState(null);
-  const [tab, setTab] = useState('leaderboard');
+  const [tab, setTab] = useState('problems');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [registered, setRegistered] = useState(false);
@@ -231,9 +231,7 @@ export default function ContestDetail() {
           )}
 
           {tab === 'problems' && (
-            <div className="card">
-              <ContestProblems contestId={id} registered={registered} />
-            </div>
+            <ContestProblems contestId={id} registered={registered} />
           )}
 
           {tab === 'summary' && (

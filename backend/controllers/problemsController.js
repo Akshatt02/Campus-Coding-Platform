@@ -60,12 +60,61 @@ export const getProblems = async (req, res) => {
             }
         }
 
+        const isAdminOrFaculty = req.user && (req.user.role === 'admin' || req.user.role === 'faculty');
+
         // Filter visibility
-        const visible = rows
-            .filter((r) => r.visible === 1 || r.visible === true)
-            .filter((r) => r.is_visible_now == 1);
+        const visible = rows.filter((r) => {
+            if (isAdminOrFaculty) return true;
+            return (r.visible === 1 || r.visible === true) && r.is_visible_now == 1;
+        });
 
         res.json({ data: visible });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+export const getProblemById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const isAdminOrFaculty = req.user && (req.user.role === 'admin' || req.user.role === 'faculty');
+
+        const [rows] = await pool.query(
+            `SELECT p.*, 
+                IFNULL((
+                    SELECT ROUND(100 * SUM(s.verdict = 'AC') / COUNT(*), 2)
+                    FROM submissions s WHERE s.problem_id = p.id
+                ), 0) AS ac_percent,
+                (SELECT GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ',') 
+                    FROM problem_tags pt
+                    JOIN tags t ON t.id = pt.tag_id
+                    WHERE pt.problem_id = p.id
+                ) AS tags,
+                IF(EXISTS(
+                    SELECT 1 FROM contest_problems cp
+                    JOIN contests c ON c.id = cp.contest_id
+                    WHERE cp.problem_id = p.id AND c.end_time > NOW()
+                ), 0, 1) AS is_visible_now
+            FROM problems p
+            WHERE p.id = ?`,
+            [id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Problem not found' });
+        }
+
+        const problem = rows[0];
+
+        // Check visibility if not admin/faculty
+        if (!isAdminOrFaculty) {
+            if (!(problem.visible === 1 || problem.visible === true) || problem.is_visible_now == 0) {
+                return res.status(404).json({ message: 'Problem not found' });
+            }
+        }
+
+        res.json(problem);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

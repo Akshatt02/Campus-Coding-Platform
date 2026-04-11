@@ -78,6 +78,15 @@ export const fetchProblems = async (token, params = {}) => {
   return data;
 };
 
+export const fetchProblemById = async (token, id) => {
+  const res = await fetch(`${BASE}/api/problems/${id}`, {
+    headers: { Authorization: token ? `Bearer ${token}` : '' }
+  });
+  const data = await json(res);
+  if (!res.ok) throw data;
+  return data;
+};
+
 export const fetchTestcases = async (problemId, token) => {
   const res = await fetch(`${BASE}/api/problems/${problemId}/testcases`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -486,6 +495,7 @@ export default {
   registerFaculty,
   fetchDepartments,
   fetchProblems,
+  fetchProblemById,
   createSubmission,
   getMySubmissions,
   fetchContests,

@@ -28,6 +28,23 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => {
   );
 };
 
+/**
+ * Helper to format a date string into YYYY-MM-DDTHH:mm for datetime-local inputs
+ */
+const formatDateForInput = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export default function FacultyContestEdit() {
   const { id } = useParams();
   const { token } = useContext(AuthContext);
@@ -67,15 +84,8 @@ export default function FacultyContestEdit() {
         setContest(res.contest);
         setProblems(res.problems || []);
         setTitle(res.contest.title || '');
-        // Format dates for datetime-local input
-        setStartTime(
-          res.contest.start_time
-            ? res.contest.start_time.substring(0, 16)
-            : ''
-        );
-        setEndTime(
-          res.contest.end_time ? res.contest.end_time.substring(0, 16) : ''
-        );
+        setStartTime(formatDateForInput(res.contest.start_time));
+        setEndTime(formatDateForInput(res.contest.end_time));
       } catch (err) {
         console.error(err);
         setMessage({

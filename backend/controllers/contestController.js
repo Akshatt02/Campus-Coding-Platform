@@ -236,7 +236,7 @@ export const getContestProblems = async (req, res) => {
     const contest = contestRows[0];
     const now = new Date();
 
-    if (role !== 'admin' && now < new Date(contest.start_time)) {
+    if (role !== 'admin' && role !== 'faculty' && now < new Date(contest.start_time)) {
       return res.status(403).json({ message: 'Contest has not started yet' });
     }
 
@@ -244,10 +244,15 @@ export const getContestProblems = async (req, res) => {
       `SELECT
          p.id,
          p.title,
+         p.statement,
          p.difficulty,
          p.visible,
          p.created_by,
          p.created_at,
+         IFNULL((
+           SELECT ROUND(100 * SUM(s.verdict = 'AC') / COUNT(*), 2)
+           FROM submissions s WHERE s.problem_id = p.id
+         ), 0) AS ac_percent,
          (SELECT GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ',') 
             FROM problem_tags pt
             JOIN tags t ON t.id = pt.tag_id

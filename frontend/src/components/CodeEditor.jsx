@@ -39,7 +39,13 @@ const getVerdict = (status) => {
   return VERDICT_MAP[status] || status;
 };
 
-export default function CodeEditor({ problemId, contestId, onSubmit }) {
+export default function CodeEditor({
+  problemId,
+  contestId,
+  onSubmit,
+  problemTitle,
+  contextLabel,
+}) {
   const { token } = useContext(AuthContext);
   const [code, setCode] = useState(DEFAULT_CODE.javascript);
   const [language, setLanguage] = useState('javascript');
@@ -178,11 +184,25 @@ export default function CodeEditor({ problemId, contestId, onSubmit }) {
 
   return (
     <div className="card p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold tracking-tight">Code Editor</h3>
-        
-        {/* Language Selector */}
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h3 className="text-lg font-bold tracking-tight text-[var(--text-primary)] sm:text-xl">
+            Code
+          </h3>
+          {(problemTitle || contextLabel) && (
+            <p className="mt-1 truncate text-sm text-[var(--text-secondary)]" title={problemTitle}>
+              {contextLabel && (
+                <span className="font-semibold text-[var(--cyan)]">{contextLabel}</span>
+              )}
+              {contextLabel && problemTitle ? ' · ' : null}
+              {problemTitle ? (
+                <span className="font-medium text-[var(--text-primary)]">{problemTitle}</span>
+              ) : null}
+            </p>
+          )}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3">
           <label className="text-xs font-bold uppercase tracking-widest muted">Language</label>
           <select
             value={language}

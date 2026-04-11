@@ -35,16 +35,11 @@ export default function ProblemDetail() {
 
       setIsLoading(true);
       try {
-        // This is inefficient, but matches the provided logic.
-        // A direct `api.fetchProblemById(id)` would be better.
-        const res = await api.fetchProblems(token, { limit: 1000 });
-        const found = (res.data || []).find(
-          (p) => String(p.id) === String(id)
-        );
-        setProblem(found || null);
+        const res = await api.fetchProblemById(token, id);
+        setProblem(res || null);
       } catch (e) {
         console.error(e);
-        // Remove error handling for now
+        // Problem not found or other error
       } finally {
         setIsLoading(false);
       }
