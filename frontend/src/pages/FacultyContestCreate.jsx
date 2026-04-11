@@ -198,7 +198,7 @@ export default function FacultyContestCreate() {
             />
             <textarea
               className="form-input"
-              placeholder="Problem Statement (HTML allowed)"
+              placeholder="Problem Statement"
               value={problem.statement}
               required
               // FIX 2: Changed 'e.targe.value' to 'e.target.value'

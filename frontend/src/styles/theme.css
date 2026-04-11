@@ -494,10 +494,17 @@ textarea.form-input {
 }
 
 .blog-article-body {
-  font-size: 1.0625rem;
-  line-height: 1.8;
-  color: var(--text-secondary);
+  font-size: 1.125rem;
+  line-height: 1.85;
+  color: var(--text-primary);
+  opacity: 0.95;
   white-space: pre-wrap;
+  letter-spacing: -0.01em;
+  font-family: var(--font-body);
+}
+
+.blog-article-body p {
+  margin-bottom: 1.5rem;
 }
 
 .blog-back-link {
@@ -520,7 +527,30 @@ textarea.form-input {
 .blog-comment-surface {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.blog-comment-surface:hover {
+  border-color: var(--border-accent);
+}
+
+.comment-node {
+  position: relative;
+}
+
+.comment-replies {
+  margin-left: 1.5rem;
+  border-left: 2px solid var(--border);
+  padding-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .comment-replies {
+    margin-left: 2.5rem;
+    padding-left: 1.5rem;
+  }
 }
 
 .blog-vote-pill {
@@ -528,8 +558,9 @@ textarea.form-input {
   align-items: center;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: var(--r-md);
+  border-radius: 99px;
   overflow: hidden;
+  padding: 0 4px;
 }
 
 .blog-vote-pill button {
@@ -641,6 +672,22 @@ textarea.form-input {
     background-position: 200% center;
   }
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+}
+.fade-in { animation-name: fadeIn; }
+.zoom-in { animation-name: zoomIn; }
+.duration-300 { animation-duration: 300ms; }
 
 .anim-fade-up {
   animation: fadeInUp 0.45s ease forwards;

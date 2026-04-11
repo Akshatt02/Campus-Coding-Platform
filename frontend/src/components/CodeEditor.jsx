@@ -46,17 +46,20 @@ export default function CodeEditor({
   problemTitle,
   contextLabel,
 }) {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [code, setCode] = useState(DEFAULT_CODE.javascript);
   const [language, setLanguage] = useState('javascript');
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('input');
   const [testResults, setTestResults] = useState([]);
   const [testCases, setTestCases] = useState([]);
   const [finalMessage, setFinalMessage] = useState('');
+
+  const isAdminOrFaculty = user?.role === 'admin' || user?.role === 'faculty';
 
   useEffect(() => {
     const loadTestCases = async () => {
@@ -90,7 +93,7 @@ export default function CodeEditor({
   };
 
   const runCode = async () => {
-    setIsLoading(true);
+    setIsRunning(true);
     setStatus('Running...');
     setFinalMessage('');
     try {
@@ -103,12 +106,12 @@ export default function CodeEditor({
       setOutput('Error: ' + error.message);
       setStatus('Error');
     } finally {
-      setIsLoading(false);
+      setIsRunning(false);
     }
   };
 
   const runTestCases = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     setStatus('Running tests...');
     setTestResults([]);
     setFinalMessage('');
@@ -159,7 +162,7 @@ export default function CodeEditor({
     }
 
     setTestResults(results);
-    setStatus(verdictStatus);
+    setStatus(allPassed ? 'Accepted' : (verdictStatus || 'Wrong Answer'));
     
     if (problemId && token) {
       try {
@@ -171,43 +174,39 @@ export default function CodeEditor({
           submissionData.contest_id = contestId;
         }
         await api.createSubmission(token, submissionData);
-        setFinalMessage(`Verdict: ${getVerdict(verdictStatus)}`);
+        setFinalMessage('Successfully Executed');
         if (onSubmit) onSubmit();
       } catch (error) {
         console.error('Failed to save submission:', error);
-        setFinalMessage(`Results: ${getVerdict(verdictStatus)} (submission not saved)`);
+        setFinalMessage('Successfully Executed (submission error)');
       }
+    } else {
+      setFinalMessage('Successfully Executed');
     }
     
-    setIsLoading(false);
+    setIsSubmitting(false);
   };
 
   return (
-    <div className="card p-6 space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h3 className="text-lg font-bold tracking-tight text-[var(--text-primary)] sm:text-xl">
-            Code
+    <div className="flex flex-col h-full min-h-[400px] bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+      {/* Top Header */}
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface-2)] border-b border-[var(--border)]">
+        <div className="flex items-center gap-2 overflow-hidden mr-4">
+          <div className="w-2 h-2 rounded-full bg-[var(--emerald)]" />
+          <h3 className="text-sm font-bold truncate">
+            {problemTitle || 'Code Editor'}
           </h3>
-          {(problemTitle || contextLabel) && (
-            <p className="mt-1 truncate text-sm text-[var(--text-secondary)]" title={problemTitle}>
-              {contextLabel && (
-                <span className="font-semibold text-[var(--cyan)]">{contextLabel}</span>
-              )}
-              {contextLabel && problemTitle ? ' · ' : null}
-              {problemTitle ? (
-                <span className="font-medium text-[var(--text-primary)]">{problemTitle}</span>
-              ) : null}
-            </p>
+          {contextLabel && (
+            <span className="badge badge-cyan !text-[10px] !py-0.5 ml-2 whitespace-nowrap">
+              {contextLabel}
+            </span>
           )}
         </div>
-
-        <div className="flex shrink-0 items-center gap-3">
-          <label className="text-xs font-bold uppercase tracking-widest muted">Language</label>
+        <div className="flex items-center gap-3">
           <select
             value={language}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            className="form-select text-sm !py-1.5 !pr-10 !bg-[var(--surface)]"
+            className="text-[12px] font-semibold bg-transparent border-none focus:ring-0 cursor-pointer text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
           >
             {Object.entries(LANGUAGES).map(([key, lang]) => (
               <option key={key} value={key}>
@@ -218,10 +217,10 @@ export default function CodeEditor({
         </div>
       </div>
 
-      {/* Monaco Editor — dark theme on light card (LeetCode-style) */}
-      <div className="editor-shell">
+      {/* Editor Main Area */}
+      <div className="flex-grow relative editor-shell !border-none !rounded-none !shadow-none">
         <Editor
-          height="450px"
+          height="100%"
           language={language}
           value={code}
           onChange={setCode}
@@ -234,153 +233,94 @@ export default function CodeEditor({
             roundedSelection: false,
             scrollBeyondLastLine: false,
             automaticLayout: true,
-            padding: { top: 16, bottom: 16 }
+            padding: { top: 16, bottom: 16 },
+            contextmenu: false,
+            scrollbar: {
+              verticalScrollbarSize: 10,
+              horizontalScrollbarSize: 10,
+            }
           }}
         />
       </div>
 
-      {/* Buttons */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex gap-3">
-          <button
-            onClick={runCode}
-            disabled={isLoading}
-            className="btn btn-secondary px-8"
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : 'Run Code'}
-          </button>
-          <button
-            onClick={runTestCases}
-            disabled={isLoading}
-            className="btn btn-primary px-8"
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 border-2 border-[var(--on-accent)] border-t-transparent rounded-full animate-spin" />
-            ) : 'Submit'}
-          </button>
-        </div>
-
-        {/* Status Mini Display */}
-        {(status || finalMessage) && (
-          <div className="flex items-center gap-3 anim-fade-in">
-            {status && (
-              <span className={`badge font-bold px-3 py-1 uppercase tracking-widest text-[10px] ${
-                status === 'Accepted' ? 'badge-green' :
-                status === 'Wrong Answer' ? 'badge-red' :
-                status === 'Runtime Error' ? 'badge-violet' :
-                status === 'Compilation Error' ? 'badge-amber' :
-                status === 'Time Limit Exceeded' ? 'badge-blue' :
-                'badge-default'
-              }`}>
-                {status === 'Accepted' ? '✔ ' : '⚠ '}
-                {status}
-              </span>
-            )}
-            {finalMessage && (
-              <span className="text-xs font-medium muted italic">
-                {finalMessage}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Tabs System */}
-      <div className="space-y-4">
-        <div className="code-io-tabs">
+      {/* Bottom Interface */}
+      <div className="flex flex-col border-t border-[var(--border)] bg-[var(--surface)]">
+        {/* Tabs System */}
+        <div className="flex border-b border-[var(--border)] px-4 bg-[var(--surface-2)]">
           {[
             { id: 'input', label: 'Custom Input' },
-            { id: 'output', label: 'Terminal Output' },
-            { id: 'tests', label: `Test Results ${testResults.length > 0 ? `(${testResults.filter(r => r.passed).length}/${testResults.length})` : ''}` }
-          ].map(tab => (
+            { id: 'output', label: 'Output' },
+            { id: 'tests', label: `Tests ${testResults.length > 0 ? `(${testResults.filter(r => r.passed).length}/${testResults.length})` : ''}`, hidden: isAdminOrFaculty }
+          ].filter(tab => !tab.hidden).map(tab => (
             <button
               key={tab.id}
-              type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`code-io-tab ${activeTab === tab.id ? 'code-io-tab-active' : ''}`}
+              className={`px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider border-b-2 transition-all ${
+                activeTab === tab.id 
+                  ? 'border-[var(--cyan)] text-[var(--cyan)] bg-[var(--surface)]' 
+                  : 'border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+              }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
 
-        <div className="anim-fade-in">
+        {/* Tab Content */}
+        <div className="h-48 overflow-auto bg-[var(--bg)] p-4">
           {activeTab === 'input' && (
-            <div className="space-y-3">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="w-full h-32 p-4 bg-[var(--surface)] border border-[var(--border)] rounded-xl font-mono text-sm text-[var(--text-primary)] focus:border-[var(--cyan)] focus:ring-2 focus:ring-[var(--cyan-dim)] transition-colors outline-none"
-                placeholder="Enter custom input for 'Run Code'..."
-              />
-            </div>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="w-full h-full p-3 bg-[var(--surface)] border border-[var(--border)] rounded-lg font-mono text-[13px] text-[var(--text-primary)] focus:ring-1 focus:ring-[var(--cyan)] outline-none resize-none"
+              placeholder="Enter custom input..."
+            />
           )}
 
           {activeTab === 'output' && (
-            <div className="space-y-3">
-              <pre className="editor-output h-32 scroll-smooth">
-                {output || (
-                  <span style={{ color: 'var(--editor-terminal-muted)' }}>
-                    No output to show. Run your code to see results.
-                  </span>
-                )}
-              </pre>
+            <div className="font-mono text-[13px] leading-relaxed">
+              {output ? (
+                <div className="space-y-4">
+                  <div className="p-3 bg-[var(--editor-terminal-bg)] text-[var(--editor-terminal-fg)] rounded-lg border border-[var(--border)] whitespace-pre-wrap min-h-[4rem]">
+                    {output}
+                  </div>
+                  {status && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] uppercase font-bold text-[var(--text-muted)]">Status:</span>
+                      <span className={`text-[11px] font-bold ${
+                        status === 'Accepted' ? 'text-[var(--emerald)]' : 'text-[var(--red)]'
+                      }`}>
+                        {status}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)] italic">
+                  Run your code to see results
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === 'tests' && (
-            <div className="space-y-4 max-h-64 overflow-auto pr-1">
+            <div className="space-y-3">
               {testResults.length === 0 ? (
-                <div className="h-full min-h-[10rem] flex flex-col items-center justify-center border-2 border-dashed border-[var(--border)] rounded-xl bg-[var(--surface-2)]/50 muted italic text-sm px-4 text-center">
-                  Run 'Submit' to see test case results
+                <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)] italic">
+                  {isAdminOrFaculty ? "Run results will appear here" : "Submit your code to see test case results"}
                 </div>
               ) : (
-                <div className="grid gap-3">
-                  {testResults.map((result, index) => (
-                    <div key={index} className={`p-4 border rounded-xl transition-all ${
-                      result.passed 
-                        ? 'bg-[var(--emerald-dim)] border-[rgba(21,128,61,0.22)]' 
-                        : 'bg-[rgba(220,38,38,0.06)] border-[rgba(220,38,38,0.2)]'
+                <div className="grid gap-2">
+                  {testResults.map((result, idx) => (
+                    <div key={idx} className={`p-3 border rounded-lg ${
+                      result.passed ? 'bg-[var(--emerald-dim)] border-[rgba(21,128,61,0.15)]' : 'bg-[rgba(220,38,38,0.05)] border-[rgba(220,38,38,0.15)]'
                     }`}>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            result.passed ? 'bg-[var(--emerald)] text-[var(--on-accent)]' : 'bg-[var(--red)] text-[var(--on-accent)]'
-                          }`}>
-                            {result.index}
-                          </span>
-                          <span className="font-bold text-sm">Test Case {result.index}</span>
-                        </div>
-                        <span className={`text-[10px] font-bold uppercase tracking-tighter sm:tracking-widest ${
-                          result.passed ? 'text-[var(--emerald)]' : 'text-[var(--red)]'
-                        }`}>
-                          {result.passed ? '✔ Passed' : '❌ Failed'}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold">Case {result.index}</span>
+                        <span className={`text-[10px] font-bold uppercase ${result.passed ? 'text-[var(--emerald)]' : 'text-[var(--red)]'}`}>
+                          {result.passed ? 'Passed' : 'Failed'}
                         </span>
                       </div>
-                      
-                      <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                        <div className="space-y-1">
-                          <div className="muted text-[9px] uppercase">Input</div>
-                          <div className="bg-[var(--bg-2)] p-2 rounded border border-[var(--border)] truncate">{result.input}</div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="muted text-[9px] uppercase">Expected</div>
-                          <div className="bg-[var(--bg-2)] p-2 rounded border border-[var(--border)] truncate">{result.expected}</div>
-                        </div>
-                        <div className="col-span-2 space-y-1">
-                          <div className="muted text-[9px] uppercase">Actual Output</div>
-                          <div className={`p-2 rounded border ${result.passed ? 'bg-[var(--bg-2)] border-[var(--border)] text-[var(--text-primary)]' : 'bg-[rgba(220,38,38,0.08)] border-[rgba(220,38,38,0.22)] text-[var(--red)]'}`}>
-                            {result.actual || 'No output'}
-                          </div>
-                        </div>
-                      </div>
-                      {result.error && (
-                        <div className="mt-3 p-2 bg-[rgba(220,38,38,0.08)] rounded border border-[rgba(220,38,38,0.2)] text-[10px] text-[var(--red)] font-mono">
-                          <strong>Error:</strong> {result.error}
-                        </div>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -388,7 +328,57 @@ export default function CodeEditor({
             </div>
           )}
         </div>
+
+        {/* Action Bar */}
+        <div className="flex items-center justify-between px-4 py-3 bg-[var(--surface-2)] border-t border-[var(--border)]">
+          <div className="flex items-center gap-3 anim-fade-in">
+            {finalMessage && (
+              <div className="flex items-center gap-2 px-3 py-1 bg-[var(--emerald-dim)] border border-[rgba(21,128,61,0.2)] rounded-full animate-in fade-in zoom-in duration-300">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
+                <span className="text-[11px] font-bold text-[var(--emerald)] uppercase tracking-wide">
+                  {finalMessage}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={runCode}
+              disabled={isRunning || isSubmitting}
+              className="flex items-center justify-center min-w-[110px] h-9 px-4 text-[12px] font-bold bg-[#f3f4f6] text-[#374151] hover:bg-[#e5e7eb] rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100"
+            >
+              {isRunning ? (
+                <div className="w-3.5 h-3.5 border-2 border-[#374151] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5 mr-1.5 opacity-80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  Run Code
+                </>
+              )}
+            </button>
+            
+            {!isAdminOrFaculty && (
+              <button
+                onClick={runTestCases}
+                disabled={isRunning || isSubmitting}
+                className="flex items-center justify-center min-w-[110px] h-9 px-4 text-[12px] font-bold bg-[#15803d] text-white hover:bg-[#166534] hover:shadow-lg hover:shadow-emerald-900/20 rounded-lg transition-all active:scale-95 disabled:opacity-50 disabled:scale-100"
+              >
+                {isSubmitting ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5 mr-1.5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Submit
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+}

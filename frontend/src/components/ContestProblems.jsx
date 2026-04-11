@@ -172,7 +172,7 @@ export default function ContestProblems({ contestId, registered }) {
             <div>
               <p className="font-medium text-[var(--text-primary)]">This contest has ended</p>
               <p className="mt-1 text-[var(--text-secondary)]">
-                Submissions are closed. Read the statement here and use{' '}
+                Submissions are closed.{' '}
                 <strong className="text-[var(--text-primary)]">Open in problem bank</strong> to practice with the full editor and your submission history.
               </p>
             </div>
@@ -224,9 +224,9 @@ export default function ContestProblems({ contestId, registered }) {
             })}
           </div>
 
-          <div className="grid min-h-0 grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
+          <div className="grid min-h-0 grid-cols-1 gap-4 lg:grid-cols-2">
             {/* Statement */}
-            <div className="card flex max-h-[min(85vh,920px)] flex-col overflow-hidden p-0">
+            <div className="card flex h-[400px] flex-col overflow-hidden p-0 lg:h-[min(85vh,750px)]">
               {selected ? (
                 <>
                   <div className="border-b border-[var(--border)] px-5 py-4">
@@ -262,7 +262,7 @@ export default function ContestProblems({ contestId, registered }) {
             </div>
 
             {/* Editor or ended CTA */}
-            <div className="flex min-h-0 flex-col gap-4 lg:max-h-[min(85vh,920px)] lg:overflow-y-auto">
+            <div className="flex h-[500px] min-h-0 flex-col gap-4 lg:h-[min(85vh,750px)]">
               {selected && canUseContestEditor && (
                 <CodeEditor
                   key={selected.id}

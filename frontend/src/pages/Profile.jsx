@@ -82,19 +82,29 @@ function TagRow({ name, attempted, solved }) {
 
 function getRatingColor(rating) {
   if (!rating) return 'var(--text-muted)';
-  if (rating >= 2100) return 'var(--amber)';
-  if (rating >= 1900) return 'var(--violet)';
-  if (rating >= 1700) return 'var(--cyan)';
-  if (rating >= 1500) return 'var(--emerald)';
-  return 'var(--text-secondary)';
+  if (rating >= 3000) return '#ff0000'; // Legendary Grandmaster
+  if (rating >= 2600) return '#ff0000'; // International Grandmaster
+  if (rating >= 2400) return '#ff0000'; // Grandmaster
+  if (rating >= 2300) return '#ff8c00'; // International Master
+  if (rating >= 2100) return '#ff8c00'; // Master
+  if (rating >= 1900) return '#aa00aa'; // Candidate Master
+  if (rating >= 1600) return '#0000ff'; // Expert
+  if (rating >= 1400) return '#03a89e'; // Specialist
+  if (rating >= 1200) return '#008000'; // Pupil
+  return '#808080'; // Newbie
 }
 
 function getRatingLabel(rating) {
   if (!rating) return '';
-  if (rating >= 2100) return 'Grandmaster';
-  if (rating >= 1900) return 'Master';
-  if (rating >= 1700) return 'Expert';
-  if (rating >= 1500) return 'Specialist';
+  if (rating >= 3000) return 'Legendary Grandmaster';
+  if (rating >= 2600) return 'International Grandmaster';
+  if (rating >= 2400) return 'Grandmaster';
+  if (rating >= 2300) return 'International Master';
+  if (rating >= 2100) return 'Master';
+  if (rating >= 1900) return 'Candidate Master';
+  if (rating >= 1600) return 'Expert';
+  if (rating >= 1400) return 'Specialist';
+  if (rating >= 1200) return 'Pupil';
   return 'Newbie';
 }
 

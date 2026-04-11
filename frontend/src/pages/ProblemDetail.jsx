@@ -68,30 +68,36 @@ export default function ProblemDetail() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Problem Card */}
-      <div className="card p-6">
-        <h2 className="text-3xl font-bold">{problem.title}</h2>
-        <div className="flex gap-2 mt-3 mb-4">
-          <span
-            className={`badge !font-bold ${getDifficultyStyle(
-              problem.difficulty
-            )}`}
-          >
-            {problem.difficulty}
-          </span>
-          <span className="badge">AC: {problem.ac_percent ?? 0}%</span>
+    <div className="flex flex-col h-[calc(100vh-100px)] overflow-hidden">
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-4 h-full min-h-0">
+        {/* Left Side: Problem Card */}
+        <div className="flex flex-col min-h-0 overflow-auto scrollbar-thin">
+          <div className="card p-6 h-full border-none lg:border lg:rounded-xl">
+            <h2 className="text-3xl font-bold tracking-tight">{problem.title}</h2>
+            <div className="flex gap-2 mt-3 mb-4">
+              <span
+                className={`badge !font-bold ${getDifficultyStyle(
+                  problem.difficulty
+                )}`}
+              >
+                {problem.difficulty}
+              </span>
+              <span className="badge badge-default">AC Rate: {problem.ac_percent ?? 0}%</span>
+            </div>
+
+            {/* Styled problem statement box */}
+            <div
+              className="problem-statement mt-4 p-5 max-w-none border-none !bg-transparent !p-0"
+              dangerouslySetInnerHTML={{ __html: problem.statement }}
+            />
+          </div>
         </div>
 
-        {/* Styled problem statement box */}
-        <div
-          className="problem-statement mt-4 p-4 max-w-none"
-          dangerouslySetInnerHTML={{ __html: problem.statement }}
-        />
+        {/* Right Side: Code Editor */}
+        <div className="flex flex-col min-h-0">
+          <CodeEditor problemId={problem.id} problemTitle={problem.title} />
+        </div>
       </div>
-
-      {/* Code Editor */}
-      <CodeEditor problemId={problem.id} />
     </div>
   );
 }
