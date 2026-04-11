@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../context/AuthContext';
 
@@ -21,8 +21,8 @@ export default function BlogEditor() {
     try {
       const blog = await api.fetchBlogById(id);
       if (blog.author_id !== user.id && user.role !== 'admin') {
-        alert("Unauthorized");
-        return navigate("/blogs");
+        alert('Unauthorized');
+        return navigate('/blogs');
       }
       setTitle(blog.title);
       setContent(blog.content);
@@ -46,47 +46,72 @@ export default function BlogEditor() {
       navigate('/blogs');
     } catch (err) {
       console.error(err);
-      alert("Failed to save blog");
+      alert('Failed to save blog');
     }
   };
 
-  if (loading) return <div className="flex justify-center p-20 text-[var(--cyan)]">Loading editor...</div>;
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
+        <div className="ui-spinner ui-spinner-lg" />
+        <p className="muted text-sm">Loading editor…</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
-      <h1 className="text-4xl font-extrabold mb-10 gradient-text">
-        {id ? 'Edit Blog' : 'Create New Blog'}
-      </h1>
+    <div className="blog-editor-shell px-4 py-8 sm:py-10">
+      <Link to="/blogs" className="blog-back-link mb-6">
+        <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to blogs
+      </Link>
 
-      <form onSubmit={handleSubmit} className="card p-8 bg-[var(--surface)] space-y-8 anim-fade-up delay-1">
-        <div>
-          <label className="form-label mb-2">Title</label>
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--text-primary)] sm:text-3xl">
+          {id ? 'Edit post' : 'Write a new post'}
+        </h1>
+        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          Plain text for now — title and body are saved as you submit. You can use line breaks for paragraphs.
+        </p>
+      </header>
+
+      <form onSubmit={handleSubmit} className="card anim-fade-up space-y-6 p-6 sm:p-8">
+        <div className="form-group">
+          <label className="form-label" htmlFor="blog-title">
+            Title
+          </label>
           <input
+            id="blog-title"
             type="text"
-            className="form-input w-full p-4 text-xl font-bold"
-            placeholder="Enter a catchy title..."
+            className="form-input text-base font-semibold sm:text-lg"
+            placeholder="e.g. Why we use segment trees in contest prep"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
         </div>
 
-        <div>
-          <label className="form-label mb-2">Content</label>
+        <div className="form-group">
+          <label className="form-label" htmlFor="blog-content">
+            Body
+          </label>
           <textarea
-            className="form-input w-full p-6 h-96 text-lg leading-relaxed"
-            placeholder="Write your blog content here..."
+            id="blog-content"
+            className="form-input min-h-[22rem] resize-y font-normal leading-relaxed sm:text-[15px]"
+            placeholder="Write your editorial, notes, or announcement…"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
           />
         </div>
 
-        <div className="flex gap-4 pt-4">
-          <button type="submit" className="btn btn-primary px-10 py-3">
-            {id ? 'Update Blog' : 'Publish Blog'}
+        <div className="flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
+          <button type="submit" className="btn btn-primary px-8">
+            {id ? 'Save changes' : 'Publish'}
           </button>
-          <button type="button" onClick={() => navigate(-1)} className="btn btn-ghost px-10">
+          <button type="button" onClick={() => navigate(-1)} className="btn btn-ghost px-6">
             Cancel
           </button>
         </div>

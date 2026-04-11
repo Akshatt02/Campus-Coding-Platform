@@ -94,7 +94,7 @@ export default function AdminContests() {
                     className="btn btn-ghost opacity-60 cursor-not-allowed"
                     aria-disabled="true"
                   >
-                    Edit (locked)
+                    Edit
                   </span>
                 )}
                 {/* Styled "View" button */}

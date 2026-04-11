@@ -480,6 +480,82 @@ textarea.form-input {
   color: var(--statement-code-fg);
 }
 
+/* Blog — shared typography & shells */
+.blog-shell {
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blog-editor-shell {
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.blog-article-body {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.blog-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cyan);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.blog-back-link:hover {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.blog-comment-surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+.blog-vote-pill {
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.blog-vote-pill button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.blog-vote-pill > button:first-child:hover {
+  background: rgba(161, 98, 7, 0.08);
+  color: var(--cyan);
+}
+
+.blog-vote-pill > button:last-child:hover {
+  background: rgba(220, 38, 38, 0.08);
+  color: var(--red);
+}
+
 .divider {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--border), transparent);

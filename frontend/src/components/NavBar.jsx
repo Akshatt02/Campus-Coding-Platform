@@ -166,17 +166,6 @@ export default function NavBar() {
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'var(--font-display)', maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user.name}
                 </span>
-                {user.rating && (
-                  <span
-                    style={{
-                      fontSize: 11, fontWeight: 700,
-                      color: 'var(--amber)',
-                      fontFamily: 'var(--font-mono)',
-                    }}
-                  >
-                    {user.rating}
-                  </span>
-                )}
               </Link>
 
               <button

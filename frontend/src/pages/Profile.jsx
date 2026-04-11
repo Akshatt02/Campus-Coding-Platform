@@ -160,15 +160,6 @@ export default function Profile() {
           }} />
 
           <div className="flex items-start gap-10 flex-wrap lg:flex-nowrap relative z-1">
-            {/* Avatar */}
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center text-4xl font-extrabold shadow-2xl flex-shrink-0"
-                 style={{
-                   background: `linear-gradient(135deg, ${ratingColor}, ${ratingColor}88)`,
-                   boxShadow: `0 12px 40px ${ratingColor}33`,
-                   color: 'var(--on-accent)',
-                 }}>
-              {user.name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
 
             {/* Info */}
             <div className="flex-1 space-y-4">

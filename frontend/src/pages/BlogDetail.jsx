@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import AuthContext from '../context/AuthContext';
 
-const Comment = ({ comment, onReply, blogId, loadBlog }) => {
+const Comment = ({ comment, blogId, loadBlog }) => {
   const { user, token } = useContext(AuthContext);
   const [replyText, setReplyText] = useState('');
   const [showReplyForm, setShowReplyForm] = useState(false);
@@ -13,7 +13,9 @@ const Comment = ({ comment, onReply, blogId, loadBlog }) => {
     try {
       await api.likeComment(token, comment.id);
       loadBlog();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleReply = async () => {
@@ -23,54 +25,64 @@ const Comment = ({ comment, onReply, blogId, loadBlog }) => {
       setReplyText('');
       setShowReplyForm(false);
       loadBlog();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="mt-4 border-l-2 border-[var(--border)] pl-4">
-      <div className="p-4 bg-[rgba(255,255,255,0.02)] rounded-lg border border-[var(--border)]">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-[var(--cyan)]">{comment.user_name}</span>
-          <span className="text-xs text-[var(--text-muted)]">{new Date(comment.created_at).toLocaleString()}</span>
+    <div className="mt-4 border-l-2 border-[var(--border-accent)] pl-4 sm:pl-5">
+      <div className="blog-comment-surface p-4 sm:p-5">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="font-semibold text-[var(--cyan)]">{comment.user_name}</span>
+          <time className="text-xs text-[var(--text-muted)]" dateTime={comment.created_at}>
+            {new Date(comment.created_at).toLocaleString()}
+          </time>
         </div>
-        <p className="text-[var(--text-secondary)] mb-3">{comment.content}</p>
-        <div className="flex items-center gap-6 mt-4">
+        <p className="text-[15px] leading-relaxed text-[var(--text-secondary)]">{comment.content}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-4">
           <button
+            type="button"
             onClick={handleLike}
-            className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--cyan)] transition-colors group"
+            className="inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--cyan)]"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.708c.954 0 1.706.84 1.488 1.76l-1.216 5.122A2 2 0 0116.994 18H7a2 2 0 01-2-2v-7a2 2 0 011.203-1.841l5.316-2.316A2.5 2.5 0 0115 7.5V10z" />
             </svg>
-            <span className="text-xs font-semibold">{comment.likes || 0}</span>
+            {comment.likes || 0}
           </button>
           <button
+            type="button"
             onClick={() => setShowReplyForm(!showReplyForm)}
-            className="text-[var(--text-muted)] hover:text-[var(--cyan)] transition-colors text-xs font-semibold flex items-center gap-1.5"
+            className="inline-flex items-center gap-1.5 rounded-md text-sm font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-2)] hover:text-[var(--cyan)]"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h10a8 8 0 018 8v2M3 10l5 5m-5-5l5-5" />
             </svg>
             Reply
           </button>
         </div>
         {showReplyForm && (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 space-y-3 border-t border-[var(--border)] pt-4">
             <textarea
-              className="form-input w-full p-2 h-20 text-sm"
-              placeholder="Write a reply..."
+              className="form-input h-24 w-full resize-y text-sm"
+              placeholder="Write a reply…"
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
             />
-            <div className="flex gap-2">
-              <button onClick={handleReply} className="btn btn-primary text-xs py-1 px-3">Submit</button>
-              <button onClick={() => setShowReplyForm(false)} className="btn btn-ghost text-xs py-1 px-3">Cancel</button>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={handleReply} className="btn btn-primary px-4 py-2 text-xs">
+                Submit
+              </button>
+              <button type="button" onClick={() => setShowReplyForm(false)} className="btn btn-ghost px-4 py-2 text-xs">
+                Cancel
+              </button>
             </div>
           </div>
         )}
       </div>
-      {comment.replies && comment.replies.map(r => (
-        <Comment key={r.id} comment={r} onReply={onReply} blogId={blogId} loadBlog={loadBlog} />
+      {comment.replies && comment.replies.map((r) => (
+        <Comment key={r.id} comment={r} blogId={blogId} loadBlog={loadBlog} />
       ))}
     </div>
   );
@@ -104,7 +116,9 @@ export default function BlogDetail() {
     try {
       await api.voteBlog(token, id, vote);
       loadBlog();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handlePostComment = async () => {
@@ -113,122 +127,154 @@ export default function BlogDetail() {
       await api.createComment(token, id, commentText);
       setCommentText('');
       loadBlog();
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleDelete = async () => {
-      if (!window.confirm("Are you sure you want to delete this blog?")) return;
-      try {
-          await api.deleteBlog(token, id);
-          navigate("/blogs");
-      } catch (err) { console.error(err); }
+    if (!window.confirm('Are you sure you want to delete this blog?')) return;
+    try {
+      await api.deleteBlog(token, id);
+      navigate('/blogs');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3 px-4">
+        <div className="ui-spinner ui-spinner-lg" />
+        <p className="muted text-sm">Loading post…</p>
+      </div>
+    );
   }
 
-  if (loading) return <div className="flex justify-center p-20 text-[var(--cyan)]">Loading blog...</div>;
-  if (!blog) return <div className="text-center p-20">Blog not found.</div>;
+  if (!blog) {
+    return (
+      <div className="blog-shell px-4 py-16 text-center">
+        <p className="font-medium text-[var(--text-primary)]">Post not found.</p>
+        <Link to="/blogs" className="blog-back-link mt-6 inline-flex justify-center">
+          ← Back to blogs
+        </Link>
+      </div>
+    );
+  }
+
+  const score = (blog.likes || 0) - (blog.dislikes || 0);
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4">
-      <Link to="/blogs" className="text-[var(--cyan)] hover:underline mb-8 inline-flex items-center gap-2">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <article className="blog-shell px-4 py-8 sm:py-10">
+      <Link to="/blogs" className="blog-back-link mb-8">
+        <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Blogs
+        All posts
       </Link>
 
       <header className="mb-10">
-        <h1 className="text-5xl font-extrabold mb-6 leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1 className="text-3xl font-bold leading-tight tracking-tight text-[var(--text-primary)] sm:text-4xl sm:leading-tight">
           {blog.title}
         </h1>
-        <div className="flex items-center justify-between pb-8 border-b border-[var(--border)]">
+
+        <div className="mt-8 flex flex-col gap-6 border-b border-[var(--border)] pb-8 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--emerald)] flex items-center justify-center font-bold text-[var(--on-accent)]">
-                 {blog.author_name?.charAt(0).toUpperCase()}
-             </div>
-             <div>
-                 <div className="font-bold text-[var(--text-primary)]">{blog.author_name}</div>
-                 <div className="text-sm text-[var(--text-muted)]">{new Date(blog.created_at).toLocaleDateString()}</div>
-             </div>
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--cyan)] to-[var(--emerald)] text-sm font-bold text-[var(--on-accent)] shadow-sm">
+              {blog.author_name?.charAt(0).toUpperCase() || '?'}
+            </div>
+            <div>
+              <div className="font-semibold text-[var(--text-primary)]">{blog.author_name}</div>
+              <time className="text-sm text-[var(--text-muted)]" dateTime={blog.created_at}>
+                {new Date(blog.created_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </time>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6">
-             <div className="flex items-center bg-[var(--surface-2)] rounded-lg border border-[var(--border)] overflow-hidden">
-                 <button
-                    onClick={() => handleVote(1)}
-                    className="p-2.5 hover:bg-[rgba(255,255,255,0.05)] transition-colors text-[var(--text-secondary)] hover:text-[var(--cyan)]"
-                    title="Upvote"
-                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 15l7-7 7 7" />
-                    </svg>
-                 </button>
-                 <span className="px-3 font-mono font-bold text-[var(--text-primary)] border-x border-[var(--border)]">
-                    {blog.likes - blog.dislikes}
-                 </span>
-                 <button
-                    onClick={() => handleVote(-1)}
-                    className="p-2.5 hover:bg-[rgba(255,255,255,0.05)] transition-colors text-[var(--text-secondary)] hover:text-[var(--red)]"
-                    title="Downvote"
-                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                    </svg>
-                 </button>
-             </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="blog-vote-pill">
+              <button type="button" onClick={() => handleVote(1)} title="Upvote" aria-label="Upvote">
+                <svg className="mx-auto h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+              <span className="border-x border-[var(--border)] px-3 font-mono text-sm font-bold text-[var(--text-primary)] tabular-nums">
+                {score}
+              </span>
+              <button type="button" onClick={() => handleVote(-1)} title="Downvote" aria-label="Downvote">
+                <svg className="mx-auto h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
 
-             {(user?.id === blog.author_id || user?.role === 'admin') && (
-                 <div className="flex gap-2">
-                     <Link to={`/blogs/${id}/edit`} className="btn btn-ghost py-2 px-4 text-sm flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        Edit
-                     </Link>
-                     <button onClick={handleDelete} className="btn py-2 px-4 text-sm bg-red-900/10 text-red-500 border border-red-500/20 hover:bg-red-900/20 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        Delete
-                     </button>
-                 </div>
-             )}
+            {(user?.id === blog.author_id || user?.role === 'admin') && (
+              <div className="flex flex-wrap gap-2">
+                <Link to={`/blogs/${id}/edit`} className="btn btn-ghost gap-2 px-4 py-2 text-sm">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit
+                </Link>
+                <button type="button" onClick={handleDelete} className="btn btn-danger gap-2 px-4 py-2 text-sm">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
-      <div className="max-w-none text-[var(--text-secondary)] leading-relaxed text-lg mb-16 whitespace-pre-wrap anim-fade-up delay-2">
-        {blog.content}
-      </div>
+      <div className="blog-article-body anim-fade-up mb-16">{blog.content}</div>
 
-      <section className="mt-20 anim-fade-up delay-3">
-        <h3 className="text-2xl font-bold mb-8">Comments ({blog.total_comments || 0})</h3>
+      <section className="border-t border-[var(--border)] pt-12 anim-fade-up">
+        <h2 className="mb-6 text-xl font-bold text-[var(--text-primary)]">
+          Comments
+          <span className="ml-2 text-base font-normal text-[var(--text-muted)]">({blog.total_comments ?? 0})</span>
+        </h2>
 
         {user ? (
-          <div className="mb-10 card p-6 bg-[rgba(255,255,255,0.01)]">
+          <div className="card mb-10 p-5 sm:p-6">
+            <label className="form-label mb-2" htmlFor="new-comment">
+              Add a comment
+            </label>
             <textarea
-              className="form-input w-full p-4 h-32 mb-4 bg-[#0d121d]"
-              placeholder="Post a comment..."
+              id="new-comment"
+              className="form-input mb-4 min-h-[7.5rem] w-full resize-y text-[15px] leading-relaxed"
+              placeholder="Share your thoughts…"
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
             />
-            <button onClick={handlePostComment} className="btn btn-primary px-8">Post Comment</button>
+            <button type="button" onClick={handlePostComment} className="btn btn-primary px-8">
+              Post comment
+            </button>
           </div>
         ) : (
-          <div className="mb-10 p-6 border border-dashed border-[var(--border)] rounded-xl text-center">
-            <Link to="/login" className="text-[var(--cyan)] hover:underline">Login</Link> to join the discussion.
+          <div className="mb-10 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-2)]/40 px-6 py-8 text-center text-sm text-[var(--text-secondary)]">
+            <Link to="/login" className="font-semibold text-[var(--cyan)] hover:underline">
+              Sign in
+            </Link>{' '}
+            to join the discussion.
           </div>
         )}
 
-        <div className="space-y-6">
-          {blog.comments.length === 0 ? (
-            <p className="text-[var(--text-muted)]">No comments yet. Start the conversation!</p>
+        <div className="space-y-2">
+          {!blog.comments || blog.comments.length === 0 ? (
+            <p className="text-sm text-[var(--text-muted)]">No comments yet. Be the first to reply.</p>
           ) : (
-            blog.comments.map(comment => (
+            (blog.comments || []).map((comment) => (
               <Comment key={comment.id} comment={comment} blogId={id} loadBlog={loadBlog} />
             ))
           )}
         </div>
       </section>
-    </div>
+    </article>
   );
 }
